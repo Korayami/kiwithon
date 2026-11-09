@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon.svg" width="96" height="96" alt="Kiwithon Icon" />
+  <img src="https://cloud.killianbeck.de/static/assets/icon.svg" width="96" height="96" alt="Kiwithon Icon" />
 </p>
 
 <h1 align="center">🥝 Kiwithon</h1>
