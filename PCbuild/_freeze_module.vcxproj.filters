@@ -606,7 +606,7 @@
     <None Include="..\Lib\runpy.py">
       <Filter>Python Files</Filter>
     </None>
-    <None Include="..\Lib\json.py">
+    <None Include="..\Lib\json\__init__.py">
       <Filter>Python Files</Filter>
     </None>
     <None Include="..\Lib\json\decoder.py">
@@ -624,7 +624,7 @@
     <None Include="..\Lib\_strptime.py">
       <Filter>Python Files</Filter>
     </None>
-    <None Include="..\Lib\zoneinfo.py">
+    <None Include="..\Lib\zoneinfo\__init__.py">
       <Filter>Python Files</Filter>
     </None>
     <None Include="..\Lib\zoneinfo\_common.py">
@@ -654,13 +654,13 @@
     <None Include="..\Lib\functools.py">
       <Filter>Python Files</Filter>
     </None>
-    <None Include="..\Lib\collections.py">
+    <None Include="..\Lib\collections\__init__.py">
       <Filter>Python Files</Filter>
     </None>
     <None Include="..\Lib\contextlib.py">
       <Filter>Python Files</Filter>
     </None>
-    <None Include="..\Lib\re.py">
+    <None Include="..\Lib\re\__init__.py">
       <Filter>Python Files</Filter>
     </None>
     <None Include="..\Lib\re\_parser.py">
@@ -669,10 +669,10 @@
     <None Include="..\Lib\re\_compiler.py">
       <Filter>Python Files</Filter>
     </None>
-    <None Include="..\Lib\pathlib.py">
+    <None Include="..\Lib\pathlib\__init__.py">
       <Filter>Python Files</Filter>
     </None>
-    <None Include="..\Lib\sqlite3.py">
+    <None Include="..\Lib\sqlite3\__init__.py">
       <Filter>Python Files</Filter>
     </None>
     <None Include="..\Lib\sqlite3\dbapi2.py">

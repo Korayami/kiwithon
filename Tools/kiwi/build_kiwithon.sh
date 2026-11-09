@@ -101,6 +101,18 @@ if [[ "${KIWITHON_DISABLE_TAIL_CALL:-0}" != "1" ]]; then
 fi
 
 # Check if LLVM/Clang toolchain is available for Tier-2 JIT and LTO=full
+LLVM_VERSION_ARG=()
+if [[ -z "${LLVM_VERSION:-}" ]]; then
+    if command -v llvm-config >/dev/null 2>&1; then
+        LLVM_VERSION="$(llvm-config --version | cut -d. -f1)"
+    elif command -v clang >/dev/null 2>&1; then
+        LLVM_VERSION="$(clang --version | grep -oE 'version [0-9]+' | awk '{print $2}')"
+    fi
+fi
+if [[ -n "${LLVM_VERSION:-}" ]]; then
+    LLVM_VERSION_ARG=("LLVM_VERSION=${LLVM_VERSION}")
+fi
+
 if [[ "${KIWITHON_DISABLE_JIT:-0}" != "1" ]]; then
     CONFIGURE_ARGS+=("--enable-experimental-jit=yes")
 fi
@@ -132,6 +144,7 @@ echo "  ARGS    = ${CONFIGURE_ARGS[*]}"
     CFLAGS="${ARCH_CFLAGS} ${CFLAGS:-}" \
     LDFLAGS="${ARCH_LDFLAGS} ${LDFLAGS:-}" \
     PROFILE_TASK="${PROFILE_TASK}" \
+    "${LLVM_VERSION_ARG[@]}" \
     "${CONFIGURE_ARGS[@]}"
 
 # -----------------------------------------------------------------------------

@@ -389,7 +389,7 @@
       <IntFile>$(IntDir)runpy.g.h</IntFile>
       <OutFile>$(GeneratedFrozenModulesDir)Python\frozen_modules\runpy.h</OutFile>
     </None>
-    <None Include="..\Lib\json.py">
+    <None Include="..\Lib\json\__init__.py">
       <ModName>json</ModName>
       <IntFile>$(IntDir)json.g.h</IntFile>
       <OutFile>$(GeneratedFrozenModulesDir)Python\frozen_modules\json.h</OutFile>
@@ -419,7 +419,7 @@
       <IntFile>$(IntDir)_strptime.g.h</IntFile>
       <OutFile>$(GeneratedFrozenModulesDir)Python\frozen_modules\_strptime.h</OutFile>
     </None>
-    <None Include="..\Lib\zoneinfo.py">
+    <None Include="..\Lib\zoneinfo\__init__.py">
       <ModName>zoneinfo</ModName>
       <IntFile>$(IntDir)zoneinfo.g.h</IntFile>
       <OutFile>$(GeneratedFrozenModulesDir)Python\frozen_modules\zoneinfo.h</OutFile>
@@ -469,7 +469,7 @@
       <IntFile>$(IntDir)functools.g.h</IntFile>
       <OutFile>$(GeneratedFrozenModulesDir)Python\frozen_modules\functools.h</OutFile>
     </None>
-    <None Include="..\Lib\collections.py">
+    <None Include="..\Lib\collections\__init__.py">
       <ModName>collections</ModName>
       <IntFile>$(IntDir)collections.g.h</IntFile>
       <OutFile>$(GeneratedFrozenModulesDir)Python\frozen_modules\collections.h</OutFile>
@@ -479,7 +479,7 @@
       <IntFile>$(IntDir)contextlib.g.h</IntFile>
       <OutFile>$(GeneratedFrozenModulesDir)Python\frozen_modules\contextlib.h</OutFile>
     </None>
-    <None Include="..\Lib\re.py">
+    <None Include="..\Lib\re\__init__.py">
       <ModName>re</ModName>
       <IntFile>$(IntDir)re.g.h</IntFile>
       <OutFile>$(GeneratedFrozenModulesDir)Python\frozen_modules\re.h</OutFile>
@@ -494,12 +494,12 @@
       <IntFile>$(IntDir)re._compiler.g.h</IntFile>
       <OutFile>$(GeneratedFrozenModulesDir)Python\frozen_modules\re._compiler.h</OutFile>
     </None>
-    <None Include="..\Lib\pathlib.py">
+    <None Include="..\Lib\pathlib\__init__.py">
       <ModName>pathlib</ModName>
       <IntFile>$(IntDir)pathlib.g.h</IntFile>
       <OutFile>$(GeneratedFrozenModulesDir)Python\frozen_modules\pathlib.h</OutFile>
     </None>
-    <None Include="..\Lib\sqlite3.py">
+    <None Include="..\Lib\sqlite3\__init__.py">
       <ModName>sqlite3</ModName>
       <IntFile>$(IntDir)sqlite3.g.h</IntFile>
       <OutFile>$(GeneratedFrozenModulesDir)Python\frozen_modules\sqlite3.h</OutFile>

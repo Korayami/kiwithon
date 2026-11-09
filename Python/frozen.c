@@ -124,13 +124,13 @@ static const struct _frozen stdlib_modules[] = {
     {"runpy", _Py_M__runpy, (int)sizeof(_Py_M__runpy), false},
 
     /* kiwithon - web & runtime hot stdlib */
-    {"json", _Py_M__json, (int)sizeof(_Py_M__json), false},
+    {"json", _Py_M__json, (int)sizeof(_Py_M__json), true},
     {"json.decoder", _Py_M__json_decoder, (int)sizeof(_Py_M__json_decoder), false},
     {"json.encoder", _Py_M__json_encoder, (int)sizeof(_Py_M__json_encoder), false},
     {"json.scanner", _Py_M__json_scanner, (int)sizeof(_Py_M__json_scanner), false},
     {"datetime", _Py_M__datetime, (int)sizeof(_Py_M__datetime), false},
     {"_strptime", _Py_M___strptime, (int)sizeof(_Py_M___strptime), false},
-    {"zoneinfo", _Py_M__zoneinfo, (int)sizeof(_Py_M__zoneinfo), false},
+    {"zoneinfo", _Py_M__zoneinfo, (int)sizeof(_Py_M__zoneinfo), true},
     {"zoneinfo._common", _Py_M__zoneinfo__common, (int)sizeof(_Py_M__zoneinfo__common), false},
     {"zoneinfo._tzpath", _Py_M__zoneinfo__tzpath, (int)sizeof(_Py_M__zoneinfo__tzpath), false},
     {"hashlib", _Py_M__hashlib, (int)sizeof(_Py_M__hashlib), false},
@@ -140,13 +140,13 @@ static const struct _frozen stdlib_modules[] = {
     {"uuid", _Py_M__uuid, (int)sizeof(_Py_M__uuid), false},
     {"urllib.parse", _Py_M__urllib_parse, (int)sizeof(_Py_M__urllib_parse), false},
     {"functools", _Py_M__functools, (int)sizeof(_Py_M__functools), false},
-    {"collections", _Py_M__collections, (int)sizeof(_Py_M__collections), false},
+    {"collections", _Py_M__collections, (int)sizeof(_Py_M__collections), true},
     {"contextlib", _Py_M__contextlib, (int)sizeof(_Py_M__contextlib), false},
-    {"re", _Py_M__re, (int)sizeof(_Py_M__re), false},
+    {"re", _Py_M__re, (int)sizeof(_Py_M__re), true},
     {"re._parser", _Py_M__re__parser, (int)sizeof(_Py_M__re__parser), false},
     {"re._compiler", _Py_M__re__compiler, (int)sizeof(_Py_M__re__compiler), false},
-    {"pathlib", _Py_M__pathlib, (int)sizeof(_Py_M__pathlib), false},
-    {"sqlite3", _Py_M__sqlite3, (int)sizeof(_Py_M__sqlite3), false},
+    {"pathlib", _Py_M__pathlib, (int)sizeof(_Py_M__pathlib), true},
+    {"sqlite3", _Py_M__sqlite3, (int)sizeof(_Py_M__sqlite3), true},
     {"sqlite3.dbapi2", _Py_M__sqlite3_dbapi2, (int)sizeof(_Py_M__sqlite3_dbapi2), false},
     {0, 0, 0} /* stdlib sentinel */
 };
