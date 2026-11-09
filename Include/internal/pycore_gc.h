@@ -340,6 +340,8 @@ extern void _PyGC_Freeze(PyInterpreterState *interp);
 extern void _PyGC_Unfreeze(PyInterpreterState *interp);
 /* Number of frozen objects */
 extern Py_ssize_t _PyGC_GetFreezeCount(PyInterpreterState *interp);
+/* Collect garbage, freeze all tracked objects, and mark them and their referents immortal */
+extern Py_ssize_t _PyGC_ImmortalizeAllTrackedObjects(PyInterpreterState *interp);
 
 extern PyObject *_PyGC_GetObjects(PyInterpreterState *interp, int generation);
 extern PyObject *_PyGC_GetReferrers(PyInterpreterState *interp, PyObject *objs);

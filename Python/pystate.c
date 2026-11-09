@@ -619,7 +619,7 @@ init_interpreter(PyInterpreterState *interp,
     uint16_t resume_default = RESUME_INITIAL_VALUE;
     uint16_t side_exit_default = SIDE_EXIT_INITIAL_VALUE;
 
-    if (is_env_enabled("PYTHON_JIT_STRESS")) {
+    if (is_env_enabled("PYTHON_JIT_STRESS") || is_env_enabled("KIWITHON_JIT_STRESS")) {
         jump_default = 63;
         side_exit_default = 63;
         resume_default = 127;
@@ -628,29 +628,54 @@ init_interpreter(PyInterpreterState *interp,
     init_policy(&interp->opt_config.jump_backward_initial_value,
                 "PYTHON_JIT_JUMP_BACKWARD_INITIAL_VALUE",
                 jump_default, 1, MAX_VALUE);
+    init_policy(&interp->opt_config.jump_backward_initial_value,
+                "KIWITHON_JIT_JUMP_BACKWARD_INITIAL_VALUE",
+                interp->opt_config.jump_backward_initial_value, 1, MAX_VALUE);
     init_policy(&interp->opt_config.jump_backward_initial_backoff,
                 "PYTHON_JIT_JUMP_BACKWARD_INITIAL_BACKOFF",
                 JUMP_BACKWARD_INITIAL_BACKOFF, 0, MAX_BACKOFF);
+    init_policy(&interp->opt_config.jump_backward_initial_backoff,
+                "KIWITHON_JIT_JUMP_BACKWARD_INITIAL_BACKOFF",
+                interp->opt_config.jump_backward_initial_backoff, 0, MAX_BACKOFF);
     init_policy(&interp->opt_config.resume_initial_value,
                 "PYTHON_JIT_RESUME_INITIAL_VALUE",
                 resume_default, 1, MAX_VALUE);
+    init_policy(&interp->opt_config.resume_initial_value,
+                "KIWITHON_JIT_RESUME_INITIAL_VALUE",
+                interp->opt_config.resume_initial_value, 1, MAX_VALUE);
     init_policy(&interp->opt_config.resume_initial_backoff,
                 "PYTHON_JIT_RESUME_INITIAL_BACKOFF",
                 RESUME_INITIAL_BACKOFF, 0, MAX_BACKOFF);
+    init_policy(&interp->opt_config.resume_initial_backoff,
+                "KIWITHON_JIT_RESUME_INITIAL_BACKOFF",
+                interp->opt_config.resume_initial_backoff, 0, MAX_BACKOFF);
     init_policy(&interp->opt_config.side_exit_initial_value,
                 "PYTHON_JIT_SIDE_EXIT_INITIAL_VALUE",
                 side_exit_default, 1, MAX_VALUE);
+    init_policy(&interp->opt_config.side_exit_initial_value,
+                "KIWITHON_JIT_SIDE_EXIT_INITIAL_VALUE",
+                interp->opt_config.side_exit_initial_value, 1, MAX_VALUE);
     init_policy(&interp->opt_config.side_exit_initial_backoff,
                 "PYTHON_JIT_SIDE_EXIT_INITIAL_BACKOFF",
                 SIDE_EXIT_INITIAL_BACKOFF, 0, MAX_BACKOFF);
+    init_policy(&interp->opt_config.side_exit_initial_backoff,
+                "KIWITHON_JIT_SIDE_EXIT_INITIAL_BACKOFF",
+                interp->opt_config.side_exit_initial_backoff, 0, MAX_BACKOFF);
 
     // Trace fitness configuration
     init_policy(&interp->opt_config.fitness_initial,
                 "PYTHON_JIT_FITNESS_INITIAL",
                 FITNESS_INITIAL, EXIT_QUALITY_CLOSE_LOOP, FITNESS_INITIAL);
+    init_policy(&interp->opt_config.fitness_initial,
+                "KIWITHON_JIT_FITNESS_INITIAL",
+                interp->opt_config.fitness_initial, EXIT_QUALITY_CLOSE_LOOP, FITNESS_INITIAL);
 
-    interp->opt_config.specialization_enabled = !is_env_enabled("PYTHON_SPECIALIZATION_OFF");
-    interp->opt_config.uops_optimize_enabled = !is_env_disabled("PYTHON_UOPS_OPTIMIZE");
+    interp->opt_config.specialization_enabled =
+        !is_env_enabled("PYTHON_SPECIALIZATION_OFF") &&
+        !is_env_enabled("KIWITHON_SPECIALIZATION_OFF");
+    interp->opt_config.uops_optimize_enabled =
+        !is_env_disabled("PYTHON_UOPS_OPTIMIZE") &&
+        !is_env_disabled("KIWITHON_UOPS_OPTIMIZE");
     if (interp != &runtime->_main_interpreter) {
         /* Fix the self-referential, statically initialized fields. */
         interp->dtoa = (struct _dtoa_state)_dtoa_state_INIT(interp);

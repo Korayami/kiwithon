@@ -1778,6 +1778,54 @@ _PyGC_GetFreezeCount(PyInterpreterState *interp)
     return gc_list_size(&gcstate->permanent_generation.head);
 }
 
+static int
+visit_immortalize(PyObject *op, void *arg)
+{
+    if (op == NULL || _Py_IsImmortal(op)) {
+        return 0;
+    }
+    /* Skip unicode objects: interned strings are managed by unicodeobject.c
+       which asserts mortality during interning transitions and shutdown. */
+    if (PyUnicode_Check(op)) {
+        return 0;
+    }
+    Py_ssize_t *count = (Py_ssize_t *)arg;
+    _Py_SetImmortalUntracked(op);
+    (*count)++;
+    return 0;
+}
+
+Py_ssize_t
+_PyGC_ImmortalizeAllTrackedObjects(PyInterpreterState *interp)
+{
+    PyThreadState *tstate = _PyThreadState_GET();
+    if (tstate != NULL && tstate->interp == interp) {
+        PyObject *exc = _PyErr_GetRaisedException(tstate);
+        gc_collect_main(tstate, NUM_GENERATIONS - 1, _Py_GC_REASON_MANUAL);
+        _PyErr_SetRaisedException(tstate, exc);
+    }
+
+    _PyGC_Freeze(interp);
+
+    GCState *gcstate = &interp->gc;
+    PyGC_Head *list = &gcstate->permanent_generation.head;
+    Py_ssize_t count = 0;
+
+    for (PyGC_Head *gc = GC_NEXT(list); gc != list; gc = GC_NEXT(gc)) {
+        PyObject *op = FROM_GC(gc);
+        if (!_Py_IsImmortal(op)) {
+            _Py_SetImmortalUntracked(op);
+            count++;
+        }
+        traverseproc traverse = Py_TYPE(op)->tp_traverse;
+        if (traverse != NULL) {
+            (void)traverse(op, visit_immortalize, &count);
+        }
+    }
+
+    return count;
+}
+
 /* C API for controlling the state of the garbage collector */
 int
 PyGC_Enable(void)

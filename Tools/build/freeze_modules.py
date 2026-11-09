@@ -82,6 +82,32 @@ FROZEN = [
         "importlib.machinery",
         "runpy",
     ]),
+    ('kiwithon - web & runtime hot stdlib', [
+        'json',
+        'json.decoder',
+        'json.encoder',
+        'json.scanner',
+        'datetime',
+        '_strptime',
+        'zoneinfo',
+        'zoneinfo._common',
+        'zoneinfo._tzpath',
+        'hashlib',
+        'hmac',
+        'secrets',
+        'base64',
+        'uuid',
+        'urllib.parse',
+        'functools',
+        'collections',
+        'contextlib',
+        're',
+        're._parser',
+        're._compiler',
+        'pathlib',
+        'sqlite3',
+        'sqlite3.dbapi2',
+    ]),
     (TESTS_SECTION, [
         '__hello__',
         '__hello__ : __hello_alias__',
@@ -92,6 +118,80 @@ FROZEN = [
         ]),
     # (End of stuff you could delete.)
 ]
+
+
+def _discover_kiwithon_app_specs(app_dir):
+    """Discover application modules to freeze when KIWITHON_APP_DIR is set."""
+    app_dir = os.path.abspath(app_dir)
+    if not os.path.isdir(app_dir):
+        return []
+
+    specs = []
+    seen_ids = set()
+
+    def _add_spec(frozenid, modname, pyfile, ispkg=False):
+        if frozenid in seen_ids or not os.path.isfile(pyfile):
+            return
+        seen_ids.add(frozenid)
+        target_mod = f'<{modname}>' if ispkg else modname
+        specs.append(f'{frozenid} : {target_mod} = {pyfile}')
+
+    # 1. Precompiled Jinja2 templates module (build/_kiwi_precompiled_templates.py)
+    precompiled_tpl = os.path.join(app_dir, 'build', '_kiwi_precompiled_templates.py')
+    if os.path.isfile(precompiled_tpl):
+        _add_spec(
+            '_kiwi_precompiled_templates',
+            '_kiwi_precompiled_templates',
+            precompiled_tpl,
+        )
+
+    # 2. All modules under src/kiwispaceone/**/*.py (or kiwispaceone/**/*.py)
+    pkg_roots = [
+        os.path.join(app_dir, 'src', 'kiwispaceone'),
+        os.path.join(app_dir, 'kiwispaceone'),
+    ]
+    for pkg_root in pkg_roots:
+        if not os.path.isdir(pkg_root):
+            continue
+        parent_root = os.path.dirname(pkg_root)
+        for root, dirs, files in os.walk(pkg_root):
+            dirs[:] = sorted(d for d in dirs if d != '__pycache__' and not d.startswith('.'))
+            for fname in sorted(files):
+                if not fname.endswith('.py'):
+                    continue
+                full_path = os.path.join(root, fname)
+                rel_path = os.path.relpath(full_path, parent_root)
+                parts = rel_path[:-3].split(os.path.sep)
+                if parts[-1] == '__init__':
+                    modname = '.'.join(parts[:-1])
+                    frozenid = f'kiwi_app_{modname.replace(".", "_")}'
+                    _add_spec(frozenid, modname, full_path, ispkg=True)
+                else:
+                    modname = '.'.join(parts)
+                    frozenid = f'kiwi_app_{modname.replace(".", "_")}'
+                    _add_spec(frozenid, modname, full_path, ispkg=False)
+        break
+
+    # 3. Application entry point main.py as kiwispaceone._main_app
+    main_py = os.path.join(app_dir, 'main.py')
+    if os.path.isfile(main_py):
+        _add_spec(
+            'kiwi_app_kiwispaceone__main_app',
+            'kiwispaceone._main_app',
+            main_py,
+            ispkg=False,
+        )
+
+    return specs
+
+
+_KIWITHON_APP_DIR = os.environ.get('KIWITHON_APP_DIR', '').strip()
+if _KIWITHON_APP_DIR:
+    _app_specs = _discover_kiwithon_app_specs(_KIWITHON_APP_DIR)
+    if _app_specs:
+        FROZEN.append(('kiwithon - application bundle', _app_specs))
+
+
 BOOTSTRAP = {
     'importlib._bootstrap',
     'importlib._bootstrap_external',

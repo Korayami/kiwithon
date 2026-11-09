@@ -525,7 +525,10 @@ classify_descriptor(PyObject *descriptor, bool has_getattr)
             }
             return OTHER_SLOT;
         }
-        if (desc_cls == &PyProperty_Type) {
+        if (desc_cls == &PyProperty_Type ||
+            (PyType_IsSubtype(desc_cls, &PyProperty_Type) &&
+             desc_cls->tp_descr_get == PyProperty_Type.tp_descr_get))
+        {
             /* We can't detect at runtime whether an attribute exists
                with property. So that means we may have to call
                __getattr__. */
@@ -542,6 +545,11 @@ classify_descriptor(PyObject *descriptor, bool has_getattr)
         }
         if (Py_IS_TYPE(descriptor, &PyClassMethod_Type)) {
             return PYTHON_CLASSMETHOD;
+        }
+        if (PyType_IsSubtype(desc_cls, &PyProperty_Type) &&
+            desc_cls->tp_descr_get == PyProperty_Type.tp_descr_get)
+        {
+            return has_getattr ? GETSET_OVERRIDDEN : PROPERTY;
         }
         return NON_OVERRIDING;
     }

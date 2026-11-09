@@ -2377,6 +2377,31 @@ config_init_lazy_imports(PyConfig *config)
         }
         config->lazy_imports = lazy_imports;
     }
+    else {
+        const char *alias = config_get_env(config, "KIWITHON_LAZY_IMPORTS");
+        if (!alias) {
+            alias = config_get_env(config, "PYTHONLAZYIMPORTS");
+        }
+        if (!alias) {
+            alias = config_get_env(config, "KIWITHONLAZYIMPORTS");
+        }
+        if (alias && *alias != '\0') {
+            if (strcmp(alias, "all") == 0 || strcmp(alias, "1") == 0 ||
+                strcmp(alias, "true") == 0 || strcmp(alias, "on") == 0)
+            {
+                config->lazy_imports = 1;
+            }
+            else if (strcmp(alias, "normal") == 0 || strcmp(alias, "0") == 0 ||
+                     strcmp(alias, "false") == 0 || strcmp(alias, "off") == 0)
+            {
+                config->lazy_imports = -1;
+            }
+            else {
+                return _PyStatus_ERR("PYTHON_LAZY_IMPORTS: invalid value; "
+                                     "expected 'all' or 'normal'");
+            }
+        }
+    }
 
     const wchar_t *x_value = config_get_xoption_value(config, L"lazy_imports");
     if (x_value) {

@@ -19,6 +19,7 @@ Data members:
 #include "pycore_call.h"          // _PyObject_CallNoArgs()
 #include "pycore_ceval.h"         // _PyEval_SetAsyncGenFinalizer()
 #include "pycore_frame.h"         // _PyInterpreterFrame
+#include "pycore_gc.h"            // _PyGC_ImmortalizeAllTrackedObjects()
 #include "pycore_import.h"        // _PyImport_SetDLOpenFlags()
 #include "pycore_initconfig.h"    // _PyStatus_EXCEPTION()
 #include "pycore_interpframe.h"   // _PyFrame_GetFirstComplete()
@@ -2884,6 +2885,37 @@ sys_get_lazy_imports_impl(PyObject *module)
     }
 }
 
+static PyObject *
+sys_set_lazy_imports_exclude_impl(PyObject *module, PyObject *exclude)
+{
+    if (PyImport_SetLazyImportsExclude(exclude) < 0) {
+        return NULL;
+    }
+    Py_RETURN_NONE;
+}
+
+static PyObject *
+sys_get_lazy_imports_exclude_impl(PyObject *module)
+{
+    PyObject *exclude = PyImport_GetLazyImportsExclude();
+    if (exclude == NULL) {
+        assert(!PyErr_Occurred());
+        Py_RETURN_NONE;
+    }
+    return exclude;
+}
+
+static PyObject *
+sys__kiwi_immortalize_heap_impl(PyObject *module)
+{
+    PyInterpreterState *interp = _PyInterpreterState_GET();
+    Py_ssize_t count = _PyGC_ImmortalizeAllTrackedObjects(interp);
+    if (count < 0) {
+        return NULL;
+    }
+    return PyLong_FromSsize_t(count);
+}
+
 static PyMethodDef sys_methods[] = {
     /* Might as well keep this in alphabetic order */
     SYS_ADDAUDITHOOK_METHODDEF
@@ -2949,6 +2981,9 @@ static PyMethodDef sys_methods[] = {
     SYS_SET_LAZY_IMPORTS_METHODDEF
     SYS_GET_LAZY_IMPORTS_FILTER_METHODDEF
     SYS_SET_LAZY_IMPORTS_FILTER_METHODDEF
+    SYS_GET_LAZY_IMPORTS_EXCLUDE_METHODDEF
+    SYS_SET_LAZY_IMPORTS_EXCLUDE_METHODDEF
+    SYS__KIWI_IMMORTALIZE_HEAP_METHODDEF
     SYS__BASEREPL_METHODDEF
 #ifdef Py_STATS
     SYS__STATS_ON_METHODDEF

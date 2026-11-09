@@ -1744,6 +1744,30 @@ FROZEN_FILES_IN = \
 		Lib/importlib/util.py \
 		Lib/importlib/machinery.py \
 		Lib/runpy.py \
+		Lib/json.py \
+		Lib/json/decoder.py \
+		Lib/json/encoder.py \
+		Lib/json/scanner.py \
+		Lib/datetime.py \
+		Lib/_strptime.py \
+		Lib/zoneinfo.py \
+		Lib/zoneinfo/_common.py \
+		Lib/zoneinfo/_tzpath.py \
+		Lib/hashlib.py \
+		Lib/hmac.py \
+		Lib/secrets.py \
+		Lib/base64.py \
+		Lib/uuid.py \
+		Lib/urllib/parse.py \
+		Lib/functools.py \
+		Lib/collections.py \
+		Lib/contextlib.py \
+		Lib/re.py \
+		Lib/re/_parser.py \
+		Lib/re/_compiler.py \
+		Lib/pathlib.py \
+		Lib/sqlite3.py \
+		Lib/sqlite3/dbapi2.py \
 		Lib/__hello__.py \
 		Lib/__phello__/__init__.py \
 		Lib/__phello__/ham/__init__.py \
@@ -1771,6 +1795,30 @@ FROZEN_FILES_OUT = \
 		Python/frozen_modules/importlib.util.h \
 		Python/frozen_modules/importlib.machinery.h \
 		Python/frozen_modules/runpy.h \
+		Python/frozen_modules/json.h \
+		Python/frozen_modules/json.decoder.h \
+		Python/frozen_modules/json.encoder.h \
+		Python/frozen_modules/json.scanner.h \
+		Python/frozen_modules/datetime.h \
+		Python/frozen_modules/_strptime.h \
+		Python/frozen_modules/zoneinfo.h \
+		Python/frozen_modules/zoneinfo._common.h \
+		Python/frozen_modules/zoneinfo._tzpath.h \
+		Python/frozen_modules/hashlib.h \
+		Python/frozen_modules/hmac.h \
+		Python/frozen_modules/secrets.h \
+		Python/frozen_modules/base64.h \
+		Python/frozen_modules/uuid.h \
+		Python/frozen_modules/urllib.parse.h \
+		Python/frozen_modules/functools.h \
+		Python/frozen_modules/collections.h \
+		Python/frozen_modules/contextlib.h \
+		Python/frozen_modules/re.h \
+		Python/frozen_modules/re._parser.h \
+		Python/frozen_modules/re._compiler.h \
+		Python/frozen_modules/pathlib.h \
+		Python/frozen_modules/sqlite3.h \
+		Python/frozen_modules/sqlite3.dbapi2.h \
 		Python/frozen_modules/__hello__.h \
 		Python/frozen_modules/__phello__.h \
 		Python/frozen_modules/__phello__.ham.h \
@@ -1848,6 +1896,78 @@ Python/frozen_modules/importlib.machinery.h: Lib/importlib/machinery.py $(FREEZE
 
 Python/frozen_modules/runpy.h: Lib/runpy.py $(FREEZE_MODULE_DEPS)
 	$(FREEZE_MODULE) runpy $(srcdir)/Lib/runpy.py Python/frozen_modules/runpy.h
+
+Python/frozen_modules/json.h: Lib/json.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) json $(srcdir)/Lib/json.py Python/frozen_modules/json.h
+
+Python/frozen_modules/json.decoder.h: Lib/json/decoder.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) json.decoder $(srcdir)/Lib/json/decoder.py Python/frozen_modules/json.decoder.h
+
+Python/frozen_modules/json.encoder.h: Lib/json/encoder.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) json.encoder $(srcdir)/Lib/json/encoder.py Python/frozen_modules/json.encoder.h
+
+Python/frozen_modules/json.scanner.h: Lib/json/scanner.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) json.scanner $(srcdir)/Lib/json/scanner.py Python/frozen_modules/json.scanner.h
+
+Python/frozen_modules/datetime.h: Lib/datetime.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) datetime $(srcdir)/Lib/datetime.py Python/frozen_modules/datetime.h
+
+Python/frozen_modules/_strptime.h: Lib/_strptime.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) _strptime $(srcdir)/Lib/_strptime.py Python/frozen_modules/_strptime.h
+
+Python/frozen_modules/zoneinfo.h: Lib/zoneinfo.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) zoneinfo $(srcdir)/Lib/zoneinfo.py Python/frozen_modules/zoneinfo.h
+
+Python/frozen_modules/zoneinfo._common.h: Lib/zoneinfo/_common.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) zoneinfo._common $(srcdir)/Lib/zoneinfo/_common.py Python/frozen_modules/zoneinfo._common.h
+
+Python/frozen_modules/zoneinfo._tzpath.h: Lib/zoneinfo/_tzpath.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) zoneinfo._tzpath $(srcdir)/Lib/zoneinfo/_tzpath.py Python/frozen_modules/zoneinfo._tzpath.h
+
+Python/frozen_modules/hashlib.h: Lib/hashlib.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) hashlib $(srcdir)/Lib/hashlib.py Python/frozen_modules/hashlib.h
+
+Python/frozen_modules/hmac.h: Lib/hmac.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) hmac $(srcdir)/Lib/hmac.py Python/frozen_modules/hmac.h
+
+Python/frozen_modules/secrets.h: Lib/secrets.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) secrets $(srcdir)/Lib/secrets.py Python/frozen_modules/secrets.h
+
+Python/frozen_modules/base64.h: Lib/base64.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) base64 $(srcdir)/Lib/base64.py Python/frozen_modules/base64.h
+
+Python/frozen_modules/uuid.h: Lib/uuid.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) uuid $(srcdir)/Lib/uuid.py Python/frozen_modules/uuid.h
+
+Python/frozen_modules/urllib.parse.h: Lib/urllib/parse.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) urllib.parse $(srcdir)/Lib/urllib/parse.py Python/frozen_modules/urllib.parse.h
+
+Python/frozen_modules/functools.h: Lib/functools.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) functools $(srcdir)/Lib/functools.py Python/frozen_modules/functools.h
+
+Python/frozen_modules/collections.h: Lib/collections.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) collections $(srcdir)/Lib/collections.py Python/frozen_modules/collections.h
+
+Python/frozen_modules/contextlib.h: Lib/contextlib.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) contextlib $(srcdir)/Lib/contextlib.py Python/frozen_modules/contextlib.h
+
+Python/frozen_modules/re.h: Lib/re.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) re $(srcdir)/Lib/re.py Python/frozen_modules/re.h
+
+Python/frozen_modules/re._parser.h: Lib/re/_parser.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) re._parser $(srcdir)/Lib/re/_parser.py Python/frozen_modules/re._parser.h
+
+Python/frozen_modules/re._compiler.h: Lib/re/_compiler.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) re._compiler $(srcdir)/Lib/re/_compiler.py Python/frozen_modules/re._compiler.h
+
+Python/frozen_modules/pathlib.h: Lib/pathlib.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) pathlib $(srcdir)/Lib/pathlib.py Python/frozen_modules/pathlib.h
+
+Python/frozen_modules/sqlite3.h: Lib/sqlite3.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) sqlite3 $(srcdir)/Lib/sqlite3.py Python/frozen_modules/sqlite3.h
+
+Python/frozen_modules/sqlite3.dbapi2.h: Lib/sqlite3/dbapi2.py $(FREEZE_MODULE_DEPS)
+	$(FREEZE_MODULE) sqlite3.dbapi2 $(srcdir)/Lib/sqlite3/dbapi2.py Python/frozen_modules/sqlite3.dbapi2.h
 
 Python/frozen_modules/__hello__.h: Lib/__hello__.py $(FREEZE_MODULE_DEPS)
 	$(FREEZE_MODULE) __hello__ $(srcdir)/Lib/__hello__.py Python/frozen_modules/__hello__.h

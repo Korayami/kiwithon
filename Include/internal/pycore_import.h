@@ -47,6 +47,9 @@ extern int _PyImport_ClearLazySubmodule(
 extern PyObject * _PyImport_LazyImportModuleLevelObject(
     PyThreadState *tstate, PyObject *name, PyObject *builtins,
     PyObject *globals, PyObject *locals, PyObject *fromlist, int level);
+extern int _PyImport_IsLazyImportExcluded(
+    PyThreadState *tstate, PyObject *globals, PyObject *name,
+    PyObject *fromlist, PyObject *level);
 
 
 #ifdef HAVE_DLOPEN
