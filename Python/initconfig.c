@@ -432,6 +432,8 @@ static const char usage_help[] =
 "#L{--help-env}: print help about Kiwithon environment variables and exit\n"
 "#L{--help-xoptions}: print help about implementation-specific #S{-X} options and exit\n"
 "#L{--help-all}: print complete help information and exit\n"
+"#L{--raw-update}: pull Kiwithon repository, rebuild, and install\n"
+"#L{--update}: fetch and install the latest Kiwithon binary\n"
 "\n"
 "#h{Arguments:}\n"
 "#s{file}   : program read from script file\n"
@@ -3066,6 +3068,20 @@ config_parse_cmdline(PyConfig *config, PyWideStringList *warnoptions,
             if (config->run_module == NULL) {
                 config->run_module = _PyMem_RawWcsdup(getopt.arg);
                 if (config->run_module == NULL) {
+                    return _PyStatus_NO_MEMORY();
+                }
+            }
+            break;
+        }
+
+        if (c == 5 || c == 6) {
+            /* --raw-update (5) or --update (6) */
+            if (config->run_command == NULL) {
+                const wchar_t *cmd = (c == 5)
+                    ? L"import _kiwithon_update, sys; sys.exit(_kiwithon_update.main(raw=True))\n"
+                    : L"import _kiwithon_update, sys; sys.exit(_kiwithon_update.main(raw=False))\n";
+                config->run_command = _PyMem_RawWcsdup(cmd);
+                if (config->run_command == NULL) {
                     return _PyStatus_NO_MEMORY();
                 }
             }

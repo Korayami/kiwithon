@@ -45,6 +45,30 @@ Installable Python kits, and information about using Python, are available at
 
 .. _python.org: https://www.python.org/
 
+Quick Installation
+------------------
+
+Install Kiwithon with a single command::
+
+    curl -fsSL https://raw.githubusercontent.com/Korayami/kiwithon/main/install.sh | sh
+
+To build directly from git source during installation::
+
+    curl -fsSL https://raw.githubusercontent.com/Korayami/kiwithon/main/install.sh | sh -s -- --raw
+
+Updating Kiwithon
+-----------------
+
+Once Kiwithon is installed, you can keep it up to date directly from the command line:
+
+- **Binary update**: Fetch and install the latest prebuilt release binary into your system::
+
+    kiwithon --update
+
+- **Source rebuild**: Pull the latest git changes, recompile, and install the freshly built binary::
+
+    kiwithon --raw-update
+
 Build Instructions
 ------------------
 

@@ -71,6 +71,8 @@ class CmdLineTest(unittest.TestCase):
                 self.assertIn(b'usage', lines[0])
                 self.assertNotIn(b'PYTHONHOME', out)
                 self.assertNotIn(b'-X dev', out)
+                self.assertIn(b'--update', out)
+                self.assertIn(b'--raw-update', out)
                 self.assertLess(len(lines), 50)
 
     @support.cpython_only
@@ -104,6 +106,8 @@ class CmdLineTest(unittest.TestCase):
         self.assertIn(b'usage', lines[0])
         self.assertIn(b'PYTHONHOME', out)
         self.assertIn(b'-X dev', out)
+        self.assertIn(b'--update', out)
+        self.assertIn(b'--raw-update', out)
 
         # The first line contains the program name,
         # but the rest should be ASCII-only
