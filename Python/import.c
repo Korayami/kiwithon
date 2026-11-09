@@ -120,6 +120,9 @@ static struct _inittab *inittab_copy = NULL;
 #define LAZY_IMPORTS_FILTER(interp) \
     (interp)->imports.lazy_imports_filter
 
+#define LAZY_IMPORTS_EXCLUDE(interp) \
+    (interp)->imports.lazy_imports_exclude
+
 #ifdef Py_GIL_DISABLED
 #define LAZY_IMPORTS_LOCK(interp) PyMutex_Lock(&(interp)->imports.lazy_mutex)
 #define LAZY_IMPORTS_UNLOCK(interp) PyMutex_Unlock(&(interp)->imports.lazy_mutex)
@@ -3610,6 +3613,22 @@ _PyImport_InitDefaultImportFunc(PyInterpreterState *interp)
         return -1;
     }
     LAZY_IMPORT_FUNC(interp) = import_func;
+
+    const char *exclude_env = Py_GETENV("KIWITHON_LAZY_IMPORTS_EXCLUDE");
+    if (exclude_env == NULL || *exclude_env == '\0') {
+        exclude_env = Py_GETENV("PYTHON_LAZY_IMPORTS_EXCLUDE");
+    }
+    if (exclude_env != NULL && *exclude_env != '\0') {
+        PyObject *env_str = PyUnicode_FromString(exclude_env);
+        if (env_str == NULL) {
+            return -1;
+        }
+        int rc = PyImport_SetLazyImportsExclude(env_str);
+        Py_DECREF(env_str);
+        if (rc < 0) {
+            return -1;
+        }
+    }
     return 0;
 }
 
@@ -4771,6 +4790,7 @@ _PyImport_ClearCore(PyInterpreterState *interp)
     Py_CLEAR(interp->imports.lazy_pending_submodules);
     Py_CLEAR(interp->imports.lazy_modules);
     Py_CLEAR(interp->imports.lazy_imports_filter);
+    Py_CLEAR(interp->imports.lazy_imports_exclude);
 }
 
 void
@@ -4940,6 +4960,221 @@ PyImport_GetLazyImportsFilter(void)
     PyObject *res = Py_XNewRef(LAZY_IMPORTS_FILTER(interp));
     LAZY_IMPORTS_UNLOCK(interp);
     return res;
+}
+
+static PyObject *
+parse_exclude_string_to_frozenset(PyObject *exclude_str)
+{
+    const char *s = PyUnicode_AsUTF8(exclude_str);
+    if (s == NULL) {
+        return NULL;
+    }
+    PyObject *set = PyFrozenSet_New(NULL);
+    if (set == NULL) {
+        return NULL;
+    }
+    const char *p = s;
+    while (*p != '\0') {
+        while (*p == ',' || *p == ':' || *p == ' ' || *p == '\t' || *p == '\n' || *p == '\r') {
+            p++;
+        }
+        if (*p == '\0') {
+            break;
+        }
+        const char *start = p;
+        while (*p != '\0' && *p != ',' && *p != ':' && *p != ' ' && *p != '\t' && *p != '\n' && *p != '\r') {
+            p++;
+        }
+        PyObject *item = PyUnicode_FromStringAndSize(start, p - start);
+        if (item == NULL) {
+            Py_DECREF(set);
+            return NULL;
+        }
+        int rc = PySet_Add(set, item);
+        Py_DECREF(item);
+        if (rc < 0) {
+            Py_DECREF(set);
+            return NULL;
+        }
+    }
+    return set;
+}
+
+int
+PyImport_SetLazyImportsExclude(PyObject *exclude)
+{
+    PyObject *frozenset = NULL;
+    if (exclude != NULL && exclude != Py_None) {
+        if (PyUnicode_Check(exclude)) {
+            frozenset = parse_exclude_string_to_frozenset(exclude);
+            if (frozenset == NULL) {
+                return -1;
+            }
+        }
+        else {
+            PyObject *iter = PyObject_GetIter(exclude);
+            if (iter == NULL) {
+                return -1;
+            }
+            frozenset = PyFrozenSet_New(NULL);
+            if (frozenset == NULL) {
+                Py_DECREF(iter);
+                return -1;
+            }
+            PyObject *item;
+            while ((item = PyIter_Next(iter)) != NULL) {
+                if (!PyUnicode_Check(item)) {
+                    Py_DECREF(item);
+                    Py_DECREF(iter);
+                    Py_DECREF(frozenset);
+                    PyErr_SetString(PyExc_TypeError,
+                                    "lazy imports exclude items must be strings");
+                    return -1;
+                }
+                int rc = PySet_Add(frozenset, item);
+                Py_DECREF(item);
+                if (rc < 0) {
+                    Py_DECREF(iter);
+                    Py_DECREF(frozenset);
+                    return -1;
+                }
+            }
+            Py_DECREF(iter);
+            if (PyErr_Occurred()) {
+                Py_DECREF(frozenset);
+                return -1;
+            }
+        }
+    }
+
+    PyInterpreterState *interp = _PyInterpreterState_GET();
+    LAZY_IMPORTS_LOCK(interp);
+    PyObject *old = LAZY_IMPORTS_EXCLUDE(interp);
+    LAZY_IMPORTS_EXCLUDE(interp) = frozenset;
+    LAZY_IMPORTS_UNLOCK(interp);
+    Py_XDECREF(old);
+    return 0;
+}
+
+PyObject *
+PyImport_GetLazyImportsExclude(void)
+{
+    PyInterpreterState *interp = _PyInterpreterState_GET();
+    LAZY_IMPORTS_LOCK(interp);
+    PyObject *res = Py_XNewRef(LAZY_IMPORTS_EXCLUDE(interp));
+    LAZY_IMPORTS_UNLOCK(interp);
+    return res;
+}
+
+static int
+is_module_name_excluded(PyObject *exclude_set, PyObject *mod_name)
+{
+    if (mod_name == NULL || !PyUnicode_Check(mod_name)) {
+        return 0;
+    }
+    int rc = PySet_Contains(exclude_set, mod_name);
+    if (rc != 0) {
+        return rc;
+    }
+    Py_ssize_t len = PyUnicode_GET_LENGTH(mod_name);
+    Py_ssize_t dot = 0;
+    while ((dot = PyUnicode_FindChar(mod_name, '.', dot, len, 1)) > 0) {
+        PyObject *prefix = PyUnicode_Substring(mod_name, 0, dot);
+        if (prefix == NULL) {
+            return -1;
+        }
+        rc = PySet_Contains(exclude_set, prefix);
+        Py_DECREF(prefix);
+        if (rc != 0) {
+            return rc;
+        }
+        dot++;
+    }
+    return 0;
+}
+
+int
+_PyImport_IsLazyImportExcluded(PyThreadState *tstate, PyObject *globals,
+                               PyObject *name, PyObject *fromlist,
+                               PyObject *level)
+{
+    PyInterpreterState *interp = tstate->interp;
+    LAZY_IMPORTS_LOCK(interp);
+    PyObject *exclude_set = Py_XNewRef(LAZY_IMPORTS_EXCLUDE(interp));
+    LAZY_IMPORTS_UNLOCK(interp);
+    if (exclude_set == NULL) {
+        return 0;
+    }
+    if (PySet_GET_SIZE(exclude_set) == 0) {
+        Py_DECREF(exclude_set);
+        return 0;
+    }
+
+    int rc = 0;
+    if (globals != NULL && PyAnyDict_Check(globals)) {
+        PyObject *importing_mod = NULL;
+        if (PyDict_GetItemRef(globals, &_Py_ID(__name__), &importing_mod) < 0) {
+            Py_DECREF(exclude_set);
+            return -1;
+        }
+        if (importing_mod != NULL) {
+            rc = is_module_name_excluded(exclude_set, importing_mod);
+            Py_DECREF(importing_mod);
+            if (rc != 0) {
+                Py_DECREF(exclude_set);
+                return rc;
+            }
+        }
+    }
+
+    int ilevel = 0;
+    if (level != NULL) {
+        ilevel = PyLong_AsInt(level);
+        if (ilevel == -1 && _PyErr_Occurred(tstate)) {
+            Py_DECREF(exclude_set);
+            return -1;
+        }
+    }
+
+    PyObject *abs_name = NULL;
+    if (ilevel == 0) {
+        abs_name = Py_XNewRef(name);
+    }
+    else if (name != NULL && PyUnicode_Check(name)) {
+        abs_name = _PyImport_GetAbsName(tstate, name, globals, ilevel);
+        if (abs_name == NULL) {
+            _PyErr_Clear(tstate);
+            Py_DECREF(exclude_set);
+            return 0;
+        }
+    }
+
+    if (abs_name != NULL) {
+        rc = is_module_name_excluded(exclude_set, abs_name);
+        if (rc == 0 && fromlist != NULL && PyTuple_Check(fromlist) &&
+            PyUnicode_Check(abs_name))
+        {
+            for (Py_ssize_t i = 0; i < PyTuple_GET_SIZE(fromlist); i++) {
+                PyObject *item = PyTuple_GET_ITEM(fromlist, i);
+                if (PyUnicode_Check(item)) {
+                    PyObject *sub_name = PyUnicode_FromFormat("%U.%U", abs_name, item);
+                    if (sub_name == NULL) {
+                        rc = -1;
+                        break;
+                    }
+                    rc = is_module_name_excluded(exclude_set, sub_name);
+                    Py_DECREF(sub_name);
+                    if (rc != 0) {
+                        break;
+                    }
+                }
+            }
+        }
+        Py_DECREF(abs_name);
+    }
+
+    Py_DECREF(exclude_set);
+    return rc;
 }
 
 int

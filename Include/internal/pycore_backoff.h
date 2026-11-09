@@ -131,8 +131,8 @@ trigger_backoff_counter(void)
 // For example, 4095 does not work for the nqueens benchmark on pyperformance
 // as we always end up tracing the loop iteration's
 // exhaustion iteration. Which aborts our current tracer.
-#define JUMP_BACKWARD_INITIAL_VALUE 4000
-#define JUMP_BACKWARD_INITIAL_BACKOFF 6
+#define JUMP_BACKWARD_INITIAL_VALUE 126
+#define JUMP_BACKWARD_INITIAL_BACKOFF 4
 static inline _Py_BackoffCounter
 initial_jump_backoff_counter(_PyOptimizationConfig *opt_config)
 {
@@ -145,8 +145,8 @@ initial_jump_backoff_counter(_PyOptimizationConfig *opt_config)
 // The reasoning is that we always want loop traces to form and inline
 // functions before functions themselves warm up and link to them instead
 // of inlining.
-#define RESUME_INITIAL_VALUE 8190
-#define RESUME_INITIAL_BACKOFF 6
+#define RESUME_INITIAL_VALUE 508
+#define RESUME_INITIAL_BACKOFF 4
 static inline _Py_BackoffCounter
 initial_resume_backoff_counter(_PyOptimizationConfig *opt_config)
 {
@@ -159,8 +159,8 @@ initial_resume_backoff_counter(_PyOptimizationConfig *opt_config)
  * Must be larger than ADAPTIVE_COOLDOWN_VALUE,
  * otherwise when a side exit warms up we may construct
  * a new trace before the Tier 1 code has properly re-specialized. */
-#define SIDE_EXIT_INITIAL_VALUE 4000
-#define SIDE_EXIT_INITIAL_BACKOFF 6
+#define SIDE_EXIT_INITIAL_VALUE 250
+#define SIDE_EXIT_INITIAL_BACKOFF 4
 
 static inline _Py_BackoffCounter
 initial_temperature_backoff_counter(_PyOptimizationConfig *opt_config)

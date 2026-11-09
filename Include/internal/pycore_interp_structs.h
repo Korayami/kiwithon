@@ -353,6 +353,7 @@ struct _import_state {
     PyObject *lazy_import_func;
     int lazy_imports_mode;
     PyObject *lazy_imports_filter;
+    PyObject *lazy_imports_exclude;
     // The set stored in sys.lazy_modules if values that have been
     // lazily imported. This value is only for debugging/introspection
     // purposes and is not used by the runtime.

@@ -2094,6 +2094,65 @@ sys_get_lazy_imports(PyObject *module, PyObject *Py_UNUSED(ignored))
     return sys_get_lazy_imports_impl(module);
 }
 
+PyDoc_STRVAR(sys_set_lazy_imports_exclude__doc__,
+"set_lazy_imports_exclude($module, exclude, /)\n"
+"--\n"
+"\n"
+"Set the C-level lazy imports exclude set.\n"
+"\n"
+"Accepts an iterable of module/package name strings, a comma/colon-separated\n"
+"string of module names, or None to clear the exclude set.");
+
+#define SYS_SET_LAZY_IMPORTS_EXCLUDE_METHODDEF    \
+    {"set_lazy_imports_exclude", (PyCFunction)sys_set_lazy_imports_exclude, METH_O, sys_set_lazy_imports_exclude__doc__},
+
+static PyObject *
+sys_set_lazy_imports_exclude_impl(PyObject *module, PyObject *exclude);
+
+static PyObject *
+sys_set_lazy_imports_exclude(PyObject *module, PyObject *exclude)
+{
+    return sys_set_lazy_imports_exclude_impl(module, exclude);
+}
+
+PyDoc_STRVAR(sys_get_lazy_imports_exclude__doc__,
+"get_lazy_imports_exclude($module, /)\n"
+"--\n"
+"\n"
+"Get the current C-level lazy imports exclude frozenset, or None if not set.");
+
+#define SYS_GET_LAZY_IMPORTS_EXCLUDE_METHODDEF    \
+    {"get_lazy_imports_exclude", (PyCFunction)sys_get_lazy_imports_exclude, METH_NOARGS, sys_get_lazy_imports_exclude__doc__},
+
+static PyObject *
+sys_get_lazy_imports_exclude_impl(PyObject *module);
+
+static PyObject *
+sys_get_lazy_imports_exclude(PyObject *module, PyObject *Py_UNUSED(ignored))
+{
+    return sys_get_lazy_imports_exclude_impl(module);
+}
+
+PyDoc_STRVAR(sys__kiwi_immortalize_heap__doc__,
+"_kiwi_immortalize_heap($module, /)\n"
+"--\n"
+"\n"
+"Run a full GC collection, freeze all tracked objects into the permanent\n"
+"generation, and mark all tracked objects and their referents as immortal.\n"
+"Returns the number of newly immortalized objects.");
+
+#define SYS__KIWI_IMMORTALIZE_HEAP_METHODDEF    \
+    {"_kiwi_immortalize_heap", (PyCFunction)sys__kiwi_immortalize_heap, METH_NOARGS, sys__kiwi_immortalize_heap__doc__},
+
+static PyObject *
+sys__kiwi_immortalize_heap_impl(PyObject *module);
+
+static PyObject *
+sys__kiwi_immortalize_heap(PyObject *module, PyObject *Py_UNUSED(ignored))
+{
+    return sys__kiwi_immortalize_heap_impl(module);
+}
+
 PyDoc_STRVAR(_jit_is_available__doc__,
 "is_available($module, /)\n"
 "--\n"

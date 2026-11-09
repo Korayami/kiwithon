@@ -1,0 +1,4 @@
+# -*- makefile -*-
+*static*
+_kiwi_native _kiwi_nativemodule.c
+_kiwi_markdown _kiwi_markdownmodule.c _kiwi_md4c/kiwi_md.c

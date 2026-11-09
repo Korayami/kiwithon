@@ -3159,6 +3159,17 @@ _PyEval_LazyImportName(PyThreadState *tstate, PyObject *builtins,
         }
     }
 
+    if (lazy && tstate->interp->imports.lazy_imports_exclude != NULL) {
+        int excluded = _PyImport_IsLazyImportExcluded(
+            tstate, globals, name, fromlist, level);
+        if (excluded < 0) {
+            return NULL;
+        }
+        if (excluded > 0) {
+            lazy = 0;
+        }
+    }
+
     if (!lazy) {
         // Not a lazy import or lazy imports are disabled, fallback to the
         // regular import.

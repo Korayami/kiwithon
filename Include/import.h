@@ -96,9 +96,11 @@ typedef enum {
 #ifndef Py_LIMITED_API
 PyAPI_FUNC(int) PyImport_SetLazyImportsMode(PyImport_LazyImportsMode mode);
 PyAPI_FUNC(int) PyImport_SetLazyImportsFilter(PyObject *filter);
+PyAPI_FUNC(int) PyImport_SetLazyImportsExclude(PyObject *exclude);
 
 PyAPI_FUNC(PyImport_LazyImportsMode) PyImport_GetLazyImportsMode(void);
 PyAPI_FUNC(PyObject *) PyImport_GetLazyImportsFilter(void);
+PyAPI_FUNC(PyObject *) PyImport_GetLazyImportsExclude(void);
 #endif
 
 #ifndef Py_LIMITED_API

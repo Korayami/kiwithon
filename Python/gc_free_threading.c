@@ -2571,6 +2571,63 @@ _PyGC_GetFreezeCount(PyInterpreterState *interp)
     return args.count;
 }
 
+struct immortalize_heap_args {
+    struct visitor_args base;
+    Py_ssize_t count;
+};
+
+static int
+visit_immortalize_referent(PyObject *op, void *arg)
+{
+    if (op == NULL || _Py_IsImmortal(op) || PyUnicode_Check(op)) {
+        return 0;
+    }
+    struct immortalize_heap_args *iargs = (struct immortalize_heap_args *)arg;
+    _Py_SetImmortalUntracked(op);
+    iargs->count++;
+    return 0;
+}
+
+static bool
+visit_immortalize_heap(const mi_heap_t *heap, const mi_heap_area_t *area,
+                       void *block, size_t block_size, void *args)
+{
+    PyObject *op = op_from_block(block, args, true);
+    if (op == NULL || gc_is_unreachable(op)) {
+        return true;
+    }
+    struct immortalize_heap_args *iargs = (struct immortalize_heap_args *)args;
+    op->ob_gc_bits |= _PyGC_BITS_FROZEN;
+    if (!_Py_IsImmortal(op)) {
+        _Py_SetImmortalUntracked(op);
+        iargs->count++;
+    }
+    traverseproc traverse = Py_TYPE(op)->tp_traverse;
+    if (traverse != NULL) {
+        (void)traverse(op, visit_immortalize_referent, iargs);
+    }
+    return true;
+}
+
+Py_ssize_t
+_PyGC_ImmortalizeAllTrackedObjects(PyInterpreterState *interp)
+{
+    PyThreadState *tstate = _PyThreadState_GET();
+    if (tstate != NULL && tstate->interp == interp) {
+        PyObject *exc = _PyErr_GetRaisedException(tstate);
+        gc_collect_main(tstate, NUM_GENERATIONS - 1, _Py_GC_REASON_MANUAL);
+        _PyErr_SetRaisedException(tstate, exc);
+    }
+
+    struct immortalize_heap_args args = { .count = 0 };
+    _PyEval_StopTheWorld(interp);
+    GCState *gcstate = get_gc_state();
+    gcstate->freeze_active = true;
+    gc_visit_heaps(interp, &visit_immortalize_heap, &args.base);
+    _PyEval_StartTheWorld(interp);
+    return args.count;
+}
+
 /* C API for controlling the state of the garbage collector */
 int
 PyGC_Enable(void)

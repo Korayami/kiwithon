@@ -60,6 +60,30 @@
 #include "frozen_modules/importlib.util.h"
 #include "frozen_modules/importlib.machinery.h"
 #include "frozen_modules/runpy.h"
+#include "frozen_modules/json.h"
+#include "frozen_modules/json.decoder.h"
+#include "frozen_modules/json.encoder.h"
+#include "frozen_modules/json.scanner.h"
+#include "frozen_modules/datetime.h"
+#include "frozen_modules/_strptime.h"
+#include "frozen_modules/zoneinfo.h"
+#include "frozen_modules/zoneinfo._common.h"
+#include "frozen_modules/zoneinfo._tzpath.h"
+#include "frozen_modules/hashlib.h"
+#include "frozen_modules/hmac.h"
+#include "frozen_modules/secrets.h"
+#include "frozen_modules/base64.h"
+#include "frozen_modules/uuid.h"
+#include "frozen_modules/urllib.parse.h"
+#include "frozen_modules/functools.h"
+#include "frozen_modules/collections.h"
+#include "frozen_modules/contextlib.h"
+#include "frozen_modules/re.h"
+#include "frozen_modules/re._parser.h"
+#include "frozen_modules/re._compiler.h"
+#include "frozen_modules/pathlib.h"
+#include "frozen_modules/sqlite3.h"
+#include "frozen_modules/sqlite3.dbapi2.h"
 #include "frozen_modules/__hello__.h"
 #include "frozen_modules/__phello__.h"
 #include "frozen_modules/__phello__.ham.h"
@@ -98,6 +122,32 @@ static const struct _frozen stdlib_modules[] = {
     {"importlib.util", _Py_M__importlib_util, (int)sizeof(_Py_M__importlib_util), false},
     {"importlib.machinery", _Py_M__importlib_machinery, (int)sizeof(_Py_M__importlib_machinery), false},
     {"runpy", _Py_M__runpy, (int)sizeof(_Py_M__runpy), false},
+
+    /* kiwithon - web & runtime hot stdlib */
+    {"json", _Py_M__json, (int)sizeof(_Py_M__json), false},
+    {"json.decoder", _Py_M__json_decoder, (int)sizeof(_Py_M__json_decoder), false},
+    {"json.encoder", _Py_M__json_encoder, (int)sizeof(_Py_M__json_encoder), false},
+    {"json.scanner", _Py_M__json_scanner, (int)sizeof(_Py_M__json_scanner), false},
+    {"datetime", _Py_M__datetime, (int)sizeof(_Py_M__datetime), false},
+    {"_strptime", _Py_M___strptime, (int)sizeof(_Py_M___strptime), false},
+    {"zoneinfo", _Py_M__zoneinfo, (int)sizeof(_Py_M__zoneinfo), false},
+    {"zoneinfo._common", _Py_M__zoneinfo__common, (int)sizeof(_Py_M__zoneinfo__common), false},
+    {"zoneinfo._tzpath", _Py_M__zoneinfo__tzpath, (int)sizeof(_Py_M__zoneinfo__tzpath), false},
+    {"hashlib", _Py_M__hashlib, (int)sizeof(_Py_M__hashlib), false},
+    {"hmac", _Py_M__hmac, (int)sizeof(_Py_M__hmac), false},
+    {"secrets", _Py_M__secrets, (int)sizeof(_Py_M__secrets), false},
+    {"base64", _Py_M__base64, (int)sizeof(_Py_M__base64), false},
+    {"uuid", _Py_M__uuid, (int)sizeof(_Py_M__uuid), false},
+    {"urllib.parse", _Py_M__urllib_parse, (int)sizeof(_Py_M__urllib_parse), false},
+    {"functools", _Py_M__functools, (int)sizeof(_Py_M__functools), false},
+    {"collections", _Py_M__collections, (int)sizeof(_Py_M__collections), false},
+    {"contextlib", _Py_M__contextlib, (int)sizeof(_Py_M__contextlib), false},
+    {"re", _Py_M__re, (int)sizeof(_Py_M__re), false},
+    {"re._parser", _Py_M__re__parser, (int)sizeof(_Py_M__re__parser), false},
+    {"re._compiler", _Py_M__re__compiler, (int)sizeof(_Py_M__re__compiler), false},
+    {"pathlib", _Py_M__pathlib, (int)sizeof(_Py_M__pathlib), false},
+    {"sqlite3", _Py_M__sqlite3, (int)sizeof(_Py_M__sqlite3), false},
+    {"sqlite3.dbapi2", _Py_M__sqlite3_dbapi2, (int)sizeof(_Py_M__sqlite3_dbapi2), false},
     {0, 0, 0} /* stdlib sentinel */
 };
 static const struct _frozen test_modules[] = {

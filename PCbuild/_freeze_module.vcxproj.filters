@@ -606,6 +606,78 @@
     <None Include="..\Lib\runpy.py">
       <Filter>Python Files</Filter>
     </None>
+    <None Include="..\Lib\json.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\json\decoder.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\json\encoder.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\json\scanner.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\datetime.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\_strptime.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\zoneinfo.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\zoneinfo\_common.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\zoneinfo\_tzpath.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\hashlib.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\hmac.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\secrets.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\base64.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\uuid.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\urllib\parse.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\functools.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\collections.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\contextlib.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\re.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\re\_parser.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\re\_compiler.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\pathlib.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\sqlite3.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="..\Lib\sqlite3\dbapi2.py">
+      <Filter>Python Files</Filter>
+    </None>
     <None Include="..\Lib\__hello__.py">
       <Filter>Python Files</Filter>
     </None>

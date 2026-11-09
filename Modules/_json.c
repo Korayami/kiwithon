@@ -22,6 +22,7 @@
 #include <stdbool.h>              // bool
 
 #include "clinic/_json.c.h"
+#include "_yyjson/kiwi_simd_json.h"
 
 /*[clinic input]
 module _json
@@ -163,8 +164,42 @@ ascii_escape_unichar(Py_UCS4 c, unsigned char *output, Py_ssize_t chars)
 static Py_ssize_t
 ascii_escape_size(const void *input, int kind, Py_ssize_t input_chars)
 {
-    Py_ssize_t i;
-    Py_ssize_t output_size;
+    Py_ssize_t i = 0;
+    Py_ssize_t output_size = 2;
+
+    if (kind == PyUnicode_1BYTE_KIND) {
+        const Py_UCS1 *buf = (const Py_UCS1 *)input;
+        while (i < input_chars) {
+            Py_ssize_t run_end = kiwi_simd_find_escape_ascii(buf, i, input_chars);
+            if (run_end > i) {
+                Py_ssize_t run_len = run_end - i;
+                if (output_size > PY_SSIZE_T_MAX - run_len) {
+                    PyErr_SetString(PyExc_OverflowError, "string is too long to escape");
+                    return -1;
+                }
+                output_size += run_len;
+                i = run_end;
+                if (i >= input_chars) {
+                    break;
+                }
+            }
+            Py_UCS4 c = buf[i++];
+            Py_ssize_t d;
+            switch (c) {
+            case '\\': case '"': case '\b': case '\f':
+            case '\n': case '\r': case '\t':
+                d = 2; break;
+            default:
+                d = 6; break;
+            }
+            if (output_size > PY_SSIZE_T_MAX - d) {
+                PyErr_SetString(PyExc_OverflowError, "string is too long to escape");
+                return -1;
+            }
+            output_size += d;
+        }
+        return output_size;
+    }
 
     /* Compute the output size */
     for (i = 0, output_size = 2; i < input_chars; i++) {
@@ -207,13 +242,32 @@ ascii_escape_unicode_and_size(const void *input, int kind, Py_ssize_t input_char
     output = PyUnicode_1BYTE_DATA(rval);
     chars = 0;
     output[chars++] = '"';
-    for (i = 0; i < input_chars; i++) {
-        Py_UCS4 c = PyUnicode_READ(kind, input, i);
-        if (S_CHAR(c)) {
-            output[chars++] = c;
+    if (kind == PyUnicode_1BYTE_KIND) {
+        const Py_UCS1 *buf = (const Py_UCS1 *)input;
+        i = 0;
+        while (i < input_chars) {
+            Py_ssize_t run_end = kiwi_simd_find_escape_ascii(buf, i, input_chars);
+            if (run_end > i) {
+                Py_ssize_t run_len = run_end - i;
+                memcpy(output + chars, buf + i, (size_t)run_len);
+                chars += run_len;
+                i = run_end;
+                if (i >= input_chars) {
+                    break;
+                }
+            }
+            chars = ascii_escape_unichar(buf[i++], output, chars);
         }
-        else {
-            chars = ascii_escape_unichar(c, output, chars);
+    }
+    else {
+        for (i = 0; i < input_chars; i++) {
+            Py_UCS4 c = PyUnicode_READ(kind, input, i);
+            if (S_CHAR(c)) {
+                output[chars++] = c;
+            }
+            else {
+                chars = ascii_escape_unichar(c, output, chars);
+            }
         }
     }
     output[chars++] = '"';
@@ -280,8 +334,44 @@ write_escaped_ascii(PyUnicodeWriter *writer, PyObject *pystr)
 static Py_ssize_t
 escape_size(const void *input, int kind, Py_ssize_t input_chars)
 {
-    Py_ssize_t i;
-    Py_ssize_t output_size;
+    Py_ssize_t i = 0;
+    Py_ssize_t output_size = 2;
+
+    if (kind == PyUnicode_1BYTE_KIND) {
+        const Py_UCS1 *buf = (const Py_UCS1 *)input;
+        while (i < input_chars) {
+            Py_ssize_t run_end = kiwi_simd_find_escape_ascii(buf, i, input_chars);
+            if (run_end > i) {
+                Py_ssize_t run_len = run_end - i;
+                if (output_size > PY_SSIZE_T_MAX - run_len) {
+                    PyErr_SetString(PyExc_OverflowError, "string is too long to escape");
+                    return -1;
+                }
+                output_size += run_len;
+                i = run_end;
+                if (i >= input_chars) {
+                    break;
+                }
+            }
+            Py_UCS4 c = buf[i++];
+            Py_ssize_t d;
+            switch (c) {
+            case '\\': case '"': case '\b': case '\f':
+            case '\n': case '\r': case '\t':
+                d = 2;
+                break;
+            default:
+                d = (c <= 0x1f) ? 6 : 1;
+                break;
+            }
+            if (output_size > PY_SSIZE_T_MAX - d) {
+                PyErr_SetString(PyExc_OverflowError, "string is too long to escape");
+                return -1;
+            }
+            output_size += d;
+        }
+        return output_size;
+    }
 
     /* Compute the output size */
     for (i = 0, output_size = 2; i < input_chars; i++) {
@@ -503,7 +593,11 @@ scanstring_unicode(PyObject *pystr, Py_ssize_t end, int strict, Py_ssize_t *next
         {
             // Use tight scope variable to help register allocation.
             Py_UCS4 d = 0;
-            for (next = end; next < len; next++) {
+            next = end;
+            if (kind == PyUnicode_1BYTE_KIND) {
+                next = kiwi_simd_scan_json_str_1byte((const Py_UCS1 *)buf, next, len, strict);
+            }
+            for (; next < len; next++) {
                 d = PyUnicode_READ(kind, buf, next);
                 if (d == '"' || d == '\\') {
                     break;
@@ -772,7 +866,7 @@ _parse_object_unicode(PyScannerObject *s, PyObject *memo, PyObject *pystr, Py_ss
         return NULL;
 
     /* skip whitespace after { */
-    while (idx <= end_idx && IS_WHITESPACE(PyUnicode_READ(kind,str, idx))) idx++;
+    idx = kiwi_simd_skip_whitespace(str, kind, idx, end_idx);
 
     /* only loop if the object is non-empty */
     if (idx > end_idx || PyUnicode_READ(kind, str, idx) != '}') {
@@ -794,13 +888,13 @@ _parse_object_unicode(PyScannerObject *s, PyObject *memo, PyObject *pystr, Py_ss
             idx = next_idx;
 
             /* skip whitespace between key and : delimiter, read :, skip whitespace */
-            while (idx <= end_idx && IS_WHITESPACE(PyUnicode_READ(kind, str, idx))) idx++;
+            idx = kiwi_simd_skip_whitespace(str, kind, idx, end_idx);
             if (idx > end_idx || PyUnicode_READ(kind, str, idx) != ':') {
                 raise_errmsg("Expecting ':' delimiter", pystr, idx);
                 goto bail;
             }
             idx++;
-            while (idx <= end_idx && IS_WHITESPACE(PyUnicode_READ(kind, str, idx))) idx++;
+            idx = kiwi_simd_skip_whitespace(str, kind, idx, end_idx);
 
             /* read any JSON term */
             PyObject *val = scan_once_unicode(s, memo, pystr, idx, &next_idx);
@@ -830,7 +924,7 @@ _parse_object_unicode(PyScannerObject *s, PyObject *memo, PyObject *pystr, Py_ss
             idx = next_idx;
 
             /* skip whitespace before } or , */
-            while (idx <= end_idx && IS_WHITESPACE(PyUnicode_READ(kind, str, idx))) idx++;
+            idx = kiwi_simd_skip_whitespace(str, kind, idx, end_idx);
 
             /* bail if the object is closed or we didn't get the , delimiter */
             if (idx <= end_idx && PyUnicode_READ(kind, str, idx) == '}')
@@ -843,7 +937,7 @@ _parse_object_unicode(PyScannerObject *s, PyObject *memo, PyObject *pystr, Py_ss
             idx++;
 
             /* skip whitespace after , delimiter */
-            while (idx <= end_idx && IS_WHITESPACE(PyUnicode_READ(kind, str, idx))) idx++;
+            idx = kiwi_simd_skip_whitespace(str, kind, idx, end_idx);
 
             if (idx <= end_idx && PyUnicode_READ(kind, str, idx) == '}') {
                 raise_errmsg("Illegal trailing comma before end of object", pystr, comma_idx);
@@ -898,7 +992,7 @@ _parse_array_unicode(PyScannerObject *s, PyObject *memo, PyObject *pystr, Py_ssi
     end_idx = PyUnicode_GET_LENGTH(pystr) - 1;
 
     /* skip whitespace after [ */
-    while (idx <= end_idx && IS_WHITESPACE(PyUnicode_READ(kind, str, idx))) idx++;
+    idx = kiwi_simd_skip_whitespace(str, kind, idx, end_idx);
 
     /* only loop if the array is non-empty */
     if (idx > end_idx || PyUnicode_READ(kind, str, idx) != ']') {
@@ -914,7 +1008,7 @@ _parse_array_unicode(PyScannerObject *s, PyObject *memo, PyObject *pystr, Py_ssi
             idx = next_idx;
 
             /* skip whitespace between term and , */
-            while (idx <= end_idx && IS_WHITESPACE(PyUnicode_READ(kind, str, idx))) idx++;
+            idx = kiwi_simd_skip_whitespace(str, kind, idx, end_idx);
 
             /* bail if the array is closed or we didn't get the , delimiter */
             if (idx <= end_idx && PyUnicode_READ(kind, str, idx) == ']')
@@ -927,7 +1021,7 @@ _parse_array_unicode(PyScannerObject *s, PyObject *memo, PyObject *pystr, Py_ssi
             idx++;
 
             /* skip whitespace after , */
-            while (idx <= end_idx && IS_WHITESPACE(PyUnicode_READ(kind, str, idx))) idx++;
+            idx = kiwi_simd_skip_whitespace(str, kind, idx, end_idx);
 
             if (idx <= end_idx && PyUnicode_READ(kind, str, idx) == ']') {
                 raise_errmsg("Illegal trailing comma before end of array", pystr, comma_idx);
@@ -1070,8 +1164,16 @@ _match_number_unicode(PyScannerObject *s, PyObject *pystr, Py_ssize_t start, Py_
         if (numstr == NULL)
             return NULL;
         rval = PyObject_CallOneArg(custom_func, numstr);
+        Py_DECREF(numstr);
     }
     else {
+        if (!is_float && kind == PyUnicode_1BYTE_KIND && (idx - start) <= 18) {
+            rval = kiwi_fast_parse_int_1byte((const Py_UCS1 *)str, start, idx);
+            if (rval != NULL) {
+                *next_idx_ptr = idx;
+                return rval;
+            }
+        }
         Py_ssize_t i, n;
         char *buf;
         /* Straight conversion to ASCII, to avoid costly conversion of
@@ -1088,8 +1190,8 @@ _match_number_unicode(PyScannerObject *s, PyObject *pystr, Py_ssize_t start, Py_
             rval = PyFloat_FromString(numstr);
         else
             rval = PyLong_FromString(buf, NULL, 10);
+        Py_DECREF(numstr);
     }
-    Py_DECREF(numstr);
     *next_idx_ptr = idx;
     return rval;
 }
