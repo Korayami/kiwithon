@@ -70,9 +70,9 @@ del warnings
 manpages_url = 'https://manpages.debian.org/{path}'
 
 # General substitutions.
-project = 'Python'
-copyright = "2001 Python Software Foundation"
-_doc_authors = 'Python documentation authors'
+project = 'Kiwithon'
+copyright = "2001 Python Software Foundation and Kiwithon contributors"
+_doc_authors = 'Python and Kiwithon documentation authors'
 
 # We look for the Include/patchlevel.h file in the current Python source tree
 # and replace the values accordingly.

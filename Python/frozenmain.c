@@ -64,7 +64,7 @@ Py_FrozenMain(int argc, char **argv)
         PyErr_Clear();
     }
     if (verbose) {
-        fprintf(stderr, "Python %s\n%s\n",
+        fprintf(stderr, "Kiwithon %s\n%s\n",
                 Py_GetVersion(), Py_GetCopyright());
     }
 

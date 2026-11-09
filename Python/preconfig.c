@@ -495,6 +495,15 @@ _Py_GetEnv(int use_environment, const char *name)
         return NULL;
     }
 
+    if (strncmp(name, "PYTHON", 6) == 0) {
+        char kiwi_name[128];
+        snprintf(kiwi_name, sizeof(kiwi_name), "KIWITHON%s", name + 6);
+        const char *var = getenv(kiwi_name);
+        if (var && var[0] != '\0') {
+            return var;
+        }
+    }
+
     const char *var = getenv(name);
     if (var && var[0] != '\0') {
         return var;

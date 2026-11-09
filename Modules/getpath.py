@@ -176,7 +176,7 @@ ABI_THREAD = ABI_THREAD or ''
 
 if os_name == 'posix' or os_name == 'darwin':
     BUILDDIR_TXT = 'pybuilddir.txt'
-    DEFAULT_PROGRAM_NAME = f'python{VERSION_MAJOR}'
+    DEFAULT_PROGRAM_NAME = f'kiwithon{VERSION_MAJOR}'
     STDLIB_SUBDIR = f'{platlibdir}/python{VERSION_MAJOR}.{VERSION_MINOR}{ABI_THREAD}'
     STDLIB_LANDMARKS = [f'{STDLIB_SUBDIR}/os.py', f'{STDLIB_SUBDIR}/os.pyc']
     PLATSTDLIB_LANDMARK = f'{platlibdir}/python{VERSION_MAJOR}.{VERSION_MINOR}{ABI_THREAD}/lib-dynload'
@@ -188,7 +188,7 @@ if os_name == 'posix' or os_name == 'darwin':
 
 elif os_name == 'nt':
     BUILDDIR_TXT = 'pybuilddir.txt'
-    DEFAULT_PROGRAM_NAME = f'python'
+    DEFAULT_PROGRAM_NAME = f'kiwithon'
     STDLIB_SUBDIR = 'Lib'
     STDLIB_LANDMARKS = [f'{STDLIB_SUBDIR}\\os.py', f'{STDLIB_SUBDIR}\\os.pyc']
     PLATSTDLIB_LANDMARK = f'{platlibdir}'
@@ -309,7 +309,11 @@ if ENV_PYTHONEXECUTABLE or ENV___PYVENV_LAUNCHER__:
         # a stub executable that execs the real interpreter in an
         # embedded app bundle. That bundle is an implementation detail
         # and should not affect base_executable.
-        base_executable = f"{dirname(library)}/bin/python{VERSION_MAJOR}.{VERSION_MINOR}"
+        base_executable = (
+            f"{dirname(library)}/bin/kiwithon{VERSION_MAJOR}.{VERSION_MINOR}"
+            if isfile(f"{dirname(library)}/bin/kiwithon{VERSION_MAJOR}.{VERSION_MINOR}")
+            else f"{dirname(library)}/bin/python{VERSION_MAJOR}.{VERSION_MINOR}"
+        )
     else:
         # Use the real executable as our base, or argv[0] otherwise
         # (on Windows, argv[0] is likely to be ENV___PYVENV_LAUNCHER__; on
@@ -398,7 +402,7 @@ if not py_setpath:
                     # In this case, try to fall back to known alternatives
                     if os_name != 'nt' and not isfile(base_executable):
                         base_exe = basename(executable)
-                        for candidate in (DEFAULT_PROGRAM_NAME, f'python{VERSION_MAJOR}.{VERSION_MINOR}'):
+                        for candidate in (DEFAULT_PROGRAM_NAME, f'kiwithon{VERSION_MAJOR}.{VERSION_MINOR}', f'python{VERSION_MAJOR}', f'python{VERSION_MAJOR}.{VERSION_MINOR}'):
                             candidate += EXE_SUFFIX if EXE_SUFFIX else ''
                             if base_exe == candidate:
                                 continue

@@ -1173,8 +1173,8 @@ _Py_RemoteDebug_GetPyRuntimeAddress(proc_handle_t* handle)
         }
     }
 #elif defined(__APPLE__) && defined(TARGET_OS_OSX) && TARGET_OS_OSX
-    // On macOS, try libpython first, then fall back to python
-    const char* candidates[] = {"libpython", "python", "Python", NULL};
+    // On macOS, try libpython first, then fall back to python / kiwithon
+    const char* candidates[] = {"libkiwithon", "kiwithon", "Kiwithon", "libpython", "python", "Python", NULL};
     for (const char** candidate = candidates; *candidate; candidate++) {
         PyErr_Clear();
         address = search_map_for_section(handle, "PyRuntime", *candidate,

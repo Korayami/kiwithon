@@ -324,8 +324,8 @@ MACHDEP_OBJS=	@MACHDEP_OBJS@
 LIBOBJDIR=	Python/
 LIBOBJS=	@LIBOBJS@
 
-PYTHON=		python$(EXE)
-BUILDPYTHON=	python$(BUILDEXE)
+PYTHON=		kiwithon$(EXE)
+BUILDPYTHON=	kiwithon$(BUILDEXE)
 
 HOSTRUNNER= @HOSTRUNNER@
 
@@ -1012,6 +1012,8 @@ PLATFORM_MAIN_OBJS=	@PLATFORM_MAIN_OBJS@
 # Build the interpreter
 $(BUILDPYTHON):	Programs/python.o $(PLATFORM_MAIN_OBJS) $(LINK_PYTHON_DEPS)
 	$(LINKCC) $(PY_CORE_EXE_LDFLAGS) $(LINKFORSHARED) -o $@ Programs/python.o $(PLATFORM_MAIN_OBJS) $(LINK_PYTHON_OBJS) $(LIBS) $(MODLIBS) $(SYSLIBS)
+	$(LN) -sf $(BUILDPYTHON) python$(BUILDEXE)
+	-if test -n "$(BUILDEXE)"; then $(LN) -sf $(BUILDPYTHON) kiwithon; $(LN) -sf $(BUILDPYTHON) python; fi
 
 platform: $(PYTHON_FOR_BUILD_DEPS) pybuilddir.txt
 	$(RUNSHARED_FOR_BUILD) $(PYTHON_FOR_BUILD) -c 'import sys ; from sysconfig import get_platform ; print("%s-%d.%d" % (get_platform(), *sys.version_info[:2]))' >platform
@@ -2495,15 +2497,18 @@ altbininstall: $(BUILDPYTHON) @FRAMEWORKPYTHONW@
 		fi; \
 	done
 	if test "$(PYTHONFRAMEWORKDIR)" = "no-framework" ; then \
-		$(INSTALL_PROGRAM) $(BUILDPYTHON) $(DESTDIR)$(BINDIR)/python$(LDVERSION)$(EXE); \
+		$(INSTALL_PROGRAM) $(BUILDPYTHON) $(DESTDIR)$(BINDIR)/kiwithon$(LDVERSION)$(EXE); \
+		(cd $(DESTDIR)$(BINDIR); $(LN) -sf kiwithon$(LDVERSION)$(EXE) python$(LDVERSION)$(EXE)); \
 	else \
-		$(INSTALL_PROGRAM) $(STRIPFLAG) Mac/pythonw $(DESTDIR)$(BINDIR)/python$(LDVERSION)$(EXE); \
+		$(INSTALL_PROGRAM) $(STRIPFLAG) Mac/pythonw $(DESTDIR)$(BINDIR)/kiwithon$(LDVERSION)$(EXE); \
+		(cd $(DESTDIR)$(BINDIR); $(LN) -sf kiwithon$(LDVERSION)$(EXE) python$(LDVERSION)$(EXE)); \
 	fi
 	-if test "$(VERSION)" != "$(LDVERSION)"; then \
-		if test -f $(DESTDIR)$(BINDIR)/python$(VERSION)$(EXE) -o -h $(DESTDIR)$(BINDIR)/python$(VERSION)$(EXE); \
-		then rm -f $(DESTDIR)$(BINDIR)/python$(VERSION)$(EXE); \
+		if test -f $(DESTDIR)$(BINDIR)/kiwithon$(VERSION)$(EXE) -o -h $(DESTDIR)$(BINDIR)/kiwithon$(VERSION)$(EXE); \
+		then rm -f $(DESTDIR)$(BINDIR)/kiwithon$(VERSION)$(EXE); \
 		fi; \
-		(cd $(DESTDIR)$(BINDIR); $(LN) python$(LDVERSION)$(EXE) python$(VERSION)$(EXE)); \
+		(cd $(DESTDIR)$(BINDIR); $(LN) kiwithon$(LDVERSION)$(EXE) kiwithon$(VERSION)$(EXE)); \
+		(cd $(DESTDIR)$(BINDIR); $(LN) -sf kiwithon$(VERSION)$(EXE) python$(VERSION)$(EXE)); \
 	fi
 	@if test "$(PY_ENABLE_SHARED)" = 1 -o "$(STATIC_LIBPYTHON)" = 1; then \
 		if test -f $(LDLIBRARY) && test "$(PYTHONFRAMEWORKDIR)" = "no-framework" ; then \
@@ -2560,23 +2565,48 @@ bininstall: commoninstall altbininstall
 		echo "Creating directory $(LIBPC)"; \
 		$(INSTALL) -d -m $(DIRMODE) $(DESTDIR)$(LIBPC); \
 	fi
+	-if test -f $(DESTDIR)$(BINDIR)/kiwithon3$(EXE) -o -h $(DESTDIR)$(BINDIR)/kiwithon3$(EXE); \
+	then rm -f $(DESTDIR)$(BINDIR)/kiwithon3$(EXE); \
+	fi
+	(cd $(DESTDIR)$(BINDIR); $(LN) -s kiwithon$(VERSION)$(EXE) kiwithon3$(EXE))
+	-if test -f $(DESTDIR)$(BINDIR)/kiwithon$(EXE) -o -h $(DESTDIR)$(BINDIR)/kiwithon$(EXE); \
+	then rm -f $(DESTDIR)$(BINDIR)/kiwithon$(EXE); \
+	fi
+	(cd $(DESTDIR)$(BINDIR); $(LN) -s kiwithon3$(EXE) kiwithon$(EXE))
 	-if test -f $(DESTDIR)$(BINDIR)/python3$(EXE) -o -h $(DESTDIR)$(BINDIR)/python3$(EXE); \
 	then rm -f $(DESTDIR)$(BINDIR)/python3$(EXE); \
 	else true; \
 	fi
-	(cd $(DESTDIR)$(BINDIR); $(LN) -s python$(VERSION)$(EXE) python3$(EXE))
-	-if test "$(VERSION)" != "$(LDVERSION)"; then \
-		rm -f $(DESTDIR)$(BINDIR)/python$(VERSION)-config; \
-		(cd $(DESTDIR)$(BINDIR); $(LN) -s python$(LDVERSION)-config python$(VERSION)-config); \
-		rm -f $(DESTDIR)$(LIBPC)/python-$(VERSION).pc; \
-		(cd $(DESTDIR)$(LIBPC); $(LN) -s python-$(LDVERSION).pc python-$(VERSION).pc); \
-		rm -f $(DESTDIR)$(LIBPC)/python-$(VERSION)-embed.pc; \
-		(cd $(DESTDIR)$(LIBPC); $(LN) -s python-$(LDVERSION)-embed.pc python-$(VERSION)-embed.pc); \
+	(cd $(DESTDIR)$(BINDIR); $(LN) -s kiwithon3$(EXE) python3$(EXE))
+	-if test -f $(DESTDIR)$(BINDIR)/python$(EXE) -o -h $(DESTDIR)$(BINDIR)/python$(EXE); \
+	then rm -f $(DESTDIR)$(BINDIR)/python$(EXE); \
+	else true; \
 	fi
+	(cd $(DESTDIR)$(BINDIR); $(LN) -s kiwithon3$(EXE) python$(EXE))
+	-if test "$(VERSION)" != "$(LDVERSION)"; then \
+		rm -f $(DESTDIR)$(BINDIR)/kiwithon$(VERSION)-config; \
+		(cd $(DESTDIR)$(BINDIR); $(LN) -s kiwithon$(LDVERSION)-config kiwithon$(VERSION)-config); \
+		rm -f $(DESTDIR)$(BINDIR)/python$(VERSION)-config; \
+		(cd $(DESTDIR)$(BINDIR); $(LN) -s kiwithon$(LDVERSION)-config python$(VERSION)-config); \
+		rm -f $(DESTDIR)$(LIBPC)/kiwithon-$(VERSION).pc; \
+		(cd $(DESTDIR)$(LIBPC); $(LN) -s kiwithon-$(LDVERSION).pc kiwithon-$(VERSION).pc); \
+		rm -f $(DESTDIR)$(LIBPC)/python-$(VERSION).pc; \
+		(cd $(DESTDIR)$(LIBPC); $(LN) -s kiwithon-$(LDVERSION).pc python-$(VERSION).pc); \
+		rm -f $(DESTDIR)$(LIBPC)/kiwithon-$(VERSION)-embed.pc; \
+		(cd $(DESTDIR)$(LIBPC); $(LN) -s kiwithon-$(LDVERSION)-embed.pc kiwithon-$(VERSION)-embed.pc); \
+		rm -f $(DESTDIR)$(LIBPC)/python-$(VERSION)-embed.pc; \
+		(cd $(DESTDIR)$(LIBPC); $(LN) -s kiwithon-$(LDVERSION)-embed.pc python-$(VERSION)-embed.pc); \
+	fi
+	-rm -f $(DESTDIR)$(BINDIR)/kiwithon3-config
+	(cd $(DESTDIR)$(BINDIR); $(LN) -s kiwithon$(VERSION)-config kiwithon3-config)
 	-rm -f $(DESTDIR)$(BINDIR)/python3-config
-	(cd $(DESTDIR)$(BINDIR); $(LN) -s python$(VERSION)-config python3-config)
+	(cd $(DESTDIR)$(BINDIR); $(LN) -s kiwithon$(VERSION)-config python3-config)
+	-rm -f $(DESTDIR)$(LIBPC)/kiwithon3.pc
+	(cd $(DESTDIR)$(LIBPC); $(LN) -s python-$(VERSION).pc kiwithon3.pc)
 	-rm -f $(DESTDIR)$(LIBPC)/python3.pc
 	(cd $(DESTDIR)$(LIBPC); $(LN) -s python-$(VERSION).pc python3.pc)
+	-rm -f $(DESTDIR)$(LIBPC)/kiwithon3-embed.pc
+	(cd $(DESTDIR)$(LIBPC); $(LN) -s python-$(VERSION)-embed.pc kiwithon3-embed.pc)
 	-rm -f $(DESTDIR)$(LIBPC)/python3-embed.pc
 	(cd $(DESTDIR)$(LIBPC); $(LN) -s python-$(VERSION)-embed.pc python3-embed.pc)
 	-rm -f $(DESTDIR)$(BINDIR)/idle3
@@ -3405,7 +3435,7 @@ clean: clean-profile clean-jit-stencils
 
 .PHONY: clobber
 clobber: clean
-	-rm -f $(BUILDPYTHON) $(LIBRARY) $(LDLIBRARY) $(DLLLIBRARY) \
+	-rm -f $(BUILDPYTHON) python$(BUILDEXE) $(LIBRARY) $(LDLIBRARY) $(DLLLIBRARY) \
 		tags TAGS \
 		config.cache config.log pyconfig.h Modules/config.c Modules/config_bootstrap.c
 	-rm -rf build platform

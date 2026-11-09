@@ -164,6 +164,11 @@ Tools/unicode/data/
 /python.bat
 /python-gdb.py
 /python.exe-gdb.py
+/kiwithon-config
+/kiwithon-config.py
+/kiwithon.bat
+/kiwithon-gdb.py
+/kiwithon.exe-gdb.py
 /reflog.txt
 /coverage/
 /externals/
@@ -182,6 +187,7 @@ Python/frozen_modules/MANIFEST
 # Ignore ./python binary on Unix but still look into ./Python/ directory.
 /python
 !/Python/
+/kiwithon
 
 # Local AI agent scratch state (per-PR and per-branch notebooks, sandbox
 # experiments) and personal agent overrides, none of which are committed.

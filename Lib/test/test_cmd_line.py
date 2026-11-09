@@ -137,7 +137,7 @@ class CmdLineTest(unittest.TestCase):
 
     @support.cpython_only
     def test_version(self):
-        short_version = ('Python %d.%d' % sys.version_info[:2])
+        short_version = ('Kiwithon %d.%d' % sys.version_info[:2])
         for switch in ('-V', '--version'):
             with self.subTest(switch=switch):
                 rc, out, err = assert_python_ok(switch)
@@ -145,7 +145,7 @@ class CmdLineTest(unittest.TestCase):
                 self.assertEqual(err, b'')
 
         rc, out, err = assert_python_ok('-VV')
-        self.assertEqual(out.rstrip(), f"Python {sys.version}".encode())
+        self.assertEqual(out.rstrip(), f"Kiwithon {sys.version}".encode())
         self.assertEqual(err, b'')
 
     def test_verbose(self):

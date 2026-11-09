@@ -388,7 +388,10 @@ _Py_SetLocaleFromEnv(int category)
      * string, the implementation-defined default locale shall be used." */
 
 #ifdef PY_COERCE_C_LOCALE
-    coerce_c_locale = getenv("PYTHONCOERCECLOCALE");
+    coerce_c_locale = getenv("KIWITHONCOERCECLOCALE");
+    if (coerce_c_locale == NULL || coerce_c_locale[0] == '\0') {
+        coerce_c_locale = getenv("PYTHONCOERCECLOCALE");
+    }
     if (coerce_c_locale == NULL || strcmp(coerce_c_locale, "0") != 0) {
         /* Some other ported code may check the environment variables (e.g. in
          * extension modules), so we make sure that they match the locale

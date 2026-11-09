@@ -808,9 +808,9 @@ def setcopyright():
     """Set 'copyright' and 'credits' in builtins"""
     builtins.copyright = _sitebuiltins._Printer("copyright", sys.copyright)
     builtins.credits = _sitebuiltins._Printer("credits", """\
-Thanks to CWI, CNRI, BeOpen, Zope Corporation, the Python Software
-Foundation, and a cast of thousands for supporting Python
-development.  See www.python.org for more information.""")
+Thanks to the Kiwithon project contributors, as well as CWI, CNRI,
+BeOpen, Zope Corporation, the Python Software Foundation, and a cast
+of thousands for supporting Python development.  See www.python.org for more information.""")
     files, dirs = [], []
     # Not all modules are required to have a __file__ attribute.  See
     # PEP 420 for more details.
@@ -831,16 +831,15 @@ def sethelper():
 
 
 def gethistoryfile():
-    """Check if the PYTHON_HISTORY environment variable is set and define
-    it as the .python_history file.  If PYTHON_HISTORY is not set, use the
-    default .python_history file.
+    """Check if the KIWITHON_HISTORY or PYTHON_HISTORY environment variable is set and define
+    it as the history file.  If not set, use the default .kiwithon_history file.
     """
     if not sys.flags.ignore_environment:
-        history = os.environ.get("PYTHON_HISTORY")
+        history = os.environ.get("KIWITHON_HISTORY") or os.environ.get("PYTHON_HISTORY")
         if history:
             return history
     return os.path.join(os.path.expanduser('~'),
-        '.python_history')
+        '.kiwithon_history')
 
 
 def enablerlcompleter():

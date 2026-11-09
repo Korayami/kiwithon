@@ -14,7 +14,7 @@ m4_define([PYTHON_VERSION], [3.16])
 
 AC_PREREQ([2.72])
 
-AC_INIT([python],[PYTHON_VERSION],[https://github.com/python/cpython/issues/])
+AC_INIT([kiwithon],[PYTHON_VERSION],[https://github.com/python/cpython/issues/])
 
 m4_ifdef(
     [AX_C_FLOAT_WORDS_BIGENDIAN],

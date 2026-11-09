@@ -402,34 +402,34 @@ static const char usage_help[] =
 "#s{-c} #b{cmd} : program passed in as string (terminates option list)\n"
 "#s{-d}     : turn on parser debugging output (for experts only, only works on\n"
 "         debug builds); also #e{PYTHONDEBUG}#B{=x}\n"
-"#s{-E}     : ignore #e{PYTHON*} environment variables (such as #e{PYTHONPATH})\n"
+"#s{-E}     : ignore #e{KIWITHON*}/#e{PYTHON*} environment variables (such as #e{KIWITHONPATH})\n"
 "#s{-h}     : print this help message and exit (also #S{-?} or #e{--help})\n"
 "#s{-i}     : inspect interactively after running script; forces a prompt even\n"
-"         if stdin does not appear to be a terminal; also #e{PYTHONINSPECT}#B{=x}\n"
-"#s{-I}     : isolate Python from the user's environment (implies #S{-E}, #S{-P} and #S{-s})\n"
+"         if stdin does not appear to be a terminal; also #e{KIWITHONINSPECT}#B{=x}\n"
+"#s{-I}     : isolate Kiwithon from the user's environment (implies #S{-E}, #S{-P} and #S{-s})\n"
 "#s{-m} #b{mod} : run library module as a script (terminates option list)\n"
 "#s{-O}     : remove assert and __debug__-dependent statements; add .opt-1 before\n"
-"         .pyc extension; also #e{PYTHONOPTIMIZE}#B{=x}\n"
+"         .pyc extension; also #e{KIWITHONOPTIMIZE}#B{=x}\n"
 "#s{-OO}    : do #S{-O} changes and also discard docstrings; add .opt-2 before\n"
 "         .pyc extension\n"
 "#s{-P}     : don't prepend a potentially unsafe path to sys.path; also\n"
-"         #e{PYTHONSAFEPATH}\n"
+"         #e{KIWITHONSAFEPATH}\n"
 "#s{-q}     : don't print version and copyright messages on interactive startup\n"
-"#s{-s}     : don't add user site directory to sys.path; also #e{PYTHONNOUSERSITE}#B{=x}\n"
+"#s{-s}     : don't add user site directory to sys.path; also #e{KIWITHONNOUSERSITE}#B{=x}\n"
 "#s{-S}     : don't imply 'import site' on initialization\n"
 "#s{-u}     : force the stdout and stderr streams to be unbuffered;\n"
-"         this option has no effect on stdin; also #e{PYTHONUNBUFFERED}#B{=x}\n"
-"#s{-v}     : verbose (trace import statements); also #e{PYTHONVERBOSE}#B{=x}\n"
+"         this option has no effect on stdin; also #e{KIWITHONUNBUFFERED}#B{=x}\n"
+"#s{-v}     : verbose (trace import statements); also #e{KIWITHONVERBOSE}#B{=x}\n"
 "         can be supplied multiple times to increase verbosity\n"
-"#s{-V}     : print the Python version number and exit (also #e{--version})\n"
+"#s{-V}     : print the Kiwithon version number and exit (also #e{--version})\n"
 "         when given twice, print more information about the build\n"
 "#s{-W} #b{arg} : warning control; #B{arg} is action:message:category:module:lineno\n"
-"         also #e{PYTHONWARNINGS}#B{=arg}\n"
+"         also #e{KIWITHONWARNINGS}#B{=arg}\n"
 "#s{-x}     : skip first line of source, allowing use of non-Unix forms of #!cmd\n"
 "#s{-X} #b{opt} : set implementation-specific option\n"
 "#L{--check-hash-based-pycs} #b{always|default|never}:\n"
-"         control how Python invalidates hash-based .pyc files\n"
-"#L{--help-env}: print help about Python environment variables and exit\n"
+"         control how Kiwithon invalidates hash-based .pyc files\n"
+"#L{--help-env}: print help about Kiwithon environment variables and exit\n"
 "#L{--help-xoptions}: print help about implementation-specific #S{-X} options and exit\n"
 "#L{--help-all}: print complete help information and exit\n"
 "\n"
@@ -667,6 +667,14 @@ Py_GETENV(const char *name)
 
     if (!use_environment) {
         return NULL;
+    }
+    if (strncmp(name, "PYTHON", 6) == 0) {
+        char kiwi_name[128];
+        snprintf(kiwi_name, sizeof(kiwi_name), "KIWITHON%s", name + 6);
+        char *var = getenv(kiwi_name);
+        if (var && var[0] != '\0') {
+            return var;
+        }
     }
     return getenv(name);
 }
@@ -1740,6 +1748,14 @@ config_get_env_dup(PyConfig *config,
     }
 
 #ifdef MS_WINDOWS
+    if (wname && wcsncmp(wname, L"PYTHON", 6) == 0) {
+        wchar_t kiwi_wname[128];
+        swprintf(kiwi_wname, sizeof(kiwi_wname) / sizeof(wchar_t), L"KIWITHON%ls", wname + 6);
+        const wchar_t *var = _wgetenv(kiwi_wname);
+        if (var && var[0] != L'\0') {
+            return PyConfig_SetString(config, dest, var);
+        }
+    }
     const wchar_t *var = _wgetenv(wname);
     if (!var || var[0] == '\0') {
         *dest = NULL;
@@ -1748,6 +1764,14 @@ config_get_env_dup(PyConfig *config,
 
     return PyConfig_SetString(config, dest, var);
 #else
+    if (name && strncmp(name, "PYTHON", 6) == 0) {
+        char kiwi_name[128];
+        snprintf(kiwi_name, sizeof(kiwi_name), "KIWITHON%s", name + 6);
+        const char *var = getenv(kiwi_name);
+        if (var && var[0] != '\0') {
+            return config_set_bytes_string(config, dest, var, decode_err_msg);
+        }
+    }
     const char *var = getenv(name);
     if (!var || var[0] == '\0') {
         *dest = NULL;
@@ -2960,7 +2984,7 @@ config_usage(int error, const wchar_t* program)
 
     fprint_help(f, usage_line, colorize, program);
     if (error) {
-        fprintf(f, "Try `python -h' for more information.\n");
+        fprintf(f, "Try `kiwithon -h' for more information.\n");
     }
     else {
         fprint_help(f, usage_help, colorize, NULL);
@@ -3217,7 +3241,7 @@ _PyConfig_ProcessDeferredCmdlineOption(PyConfig *config)
         program = argv->items[0];
     }
     if (!program) {
-        program = L"python";
+        program = L"kiwithon";
     }
 
     switch (c) {
@@ -3227,11 +3251,11 @@ _PyConfig_ProcessDeferredCmdlineOption(PyConfig *config)
         return 0;
 
     case 'V':
-        printf("Python %s\n", PY_VERSION);
+        printf("Kiwithon %s\n", PY_VERSION);
         return 0;
 
     case 'W':  // -VV or more -V options
-        printf("Python %s\n", Py_GetVersion());
+        printf("Kiwithon %s\n", Py_GetVersion());
         return 0;
 
     // Integers represent long options, see Python/getopt.c
