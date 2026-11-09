@@ -1,0 +1,105 @@
+name: Release Binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag name (e.g. v3.16.0a1)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  build-binaries:
+    name: Build (${{ matrix.platform }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            platform: linux-x86_64
+          - os: ubuntu-24.04-arm
+            platform: linux-aarch64
+          - os: macos-14
+            platform: macos-arm64
+          - os: macos-13
+            platform: macos-x86_64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev zlib1g-dev \
+            libncurses5-dev libncursesw5-dev libreadline-dev libsqlite3-dev \
+            libgdbm-dev libbz2-dev libexpat1-dev liblzma-dev libffi-dev
+
+      - name: Configure Kiwithon
+        run: |
+          ./configure --prefix=/usr/local
+
+      - name: Compile Kiwithon
+        run: |
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            JOBS=$(sysctl -n hw.ncpu 2>/dev/null || echo 4)
+          else
+            JOBS=$(nproc 2>/dev/null || echo 4)
+          fi
+          make -j"$JOBS"
+
+      - name: Stage installation
+        run: |
+          mkdir -p "$PWD/staging"
+          make install DESTDIR="$PWD/staging"
+
+      - name: Package archive
+        run: |
+          TARBALL="kiwithon-${{ matrix.platform }}.tar.gz"
+          tar -czf "$TARBALL" -C staging/usr/local .
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum "$TARBALL" > "${TARBALL}.sha256"
+          else
+            shasum -a 256 "$TARBALL" > "${TARBALL}.sha256"
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}
+          path: |
+            kiwithon-${{ matrix.platform }}.tar.gz
+            kiwithon-${{ matrix.platform }}.tar.gz.sha256
+
+  publish-release:
+    name: Publish Release
+    needs: build-binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Consolidate archives and checksums
+        run: |
+          mkdir -p dist
+          find artifacts -name "*.tar.gz" -exec cp {} dist/ \;
+          find artifacts -name "*.tar.gz.sha256" -exec cat {} + > dist/SHA256SUMS
+          cat dist/SHA256SUMS
+
+      - name: Publish GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.inputs.tag_name || github.ref_name }}
+        run: |
+          gh release upload "$TAG" dist/* --clobber || \
+          gh release create "$TAG" dist/* --title "Kiwithon $TAG" --notes "Automated release binaries for Kiwithon $TAG."
